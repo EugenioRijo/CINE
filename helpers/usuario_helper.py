@@ -1,15 +1,40 @@
 """
-Helper de Usuario
-Implementa la lógica de negocio relacionada con los usuarios.
+@file: helpers/usuario_helper.py
+@description: Implementa la lógica de negocio para operaciones con usuarios
 
-Áreas de mejora potenciales:
-- Implementar validaciones más robustas
-- Agregar manejo de roles y permisos
-- Implementar sistema de notificaciones
-- Agregar funcionalidades de recuperación de contraseña
-- Implementar verificación de email
-- Agregar autenticación con proveedores externos (OAuth)
-- Implementar sistema de tokens JWT
+Este helper actúa como una capa intermedia entre los controladores/rutas y el repositorio,
+implementando la lógica de negocio necesaria para el manejo de usuarios.
+
+@methods:
+    registrar_usuario(nombre, email, password):
+        Registra un nuevo usuario en el sistema
+        Parámetros:
+            - nombre (str): Nombre del usuario
+            - email (str): Email único del usuario
+            - password (str): Contraseña sin hashear
+        Retorna: 
+            tuple (Usuario, str):
+                - Éxito: (usuario_creado, None)
+                - Error: (None, mensaje_error)
+        
+    actualizar_usuario(usuario_id, data):
+        Actualiza los datos de un usuario existente
+        Parámetros:
+            - usuario_id (int): ID del usuario
+            - data (dict): Datos a actualizar
+        Retorna:
+            tuple (Usuario, str):
+                - Éxito: (usuario_actualizado, None)
+                - Error: (None, mensaje_error)
+
+@validaciones:
+    - Verifica existencia de email duplicado
+    - Hashea contraseñas antes de almacenar
+    - Valida existencia de usuario antes de actualizar
+
+@dependencies:
+    - repositories.usuario_repository.UsuarioRepository
+    - werkzeug.security.generate_password_hash
 """
 
 from repositories.usuario_repository import UsuarioRepository
