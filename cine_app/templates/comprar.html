@@ -1,0 +1,26 @@
+<!-- comprar.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pelicula.titulo }}</title>
+</head>
+<body>
+    <h2>{{ pelicula.titulo }}</h2>
+    <p>{{ pelicula.sinopsis }}</p>
+    
+    <form method="POST">
+        <label for="cantidad">Cantidad de Entradas:</label>
+        <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
+
+        <label for="horario_id">Seleccionar Horario:</label>
+        <select name="horario_id" id="horario_id">
+            {% for horario in horarios %}
+                <option value="{{ horario.id }}">{{ horario.hora }} - Sala: {{ horario.sala }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Continuar a Selección de Asientos</button>
+    </form>
+</body>
+</html>

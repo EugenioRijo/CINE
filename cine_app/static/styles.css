@@ -1,0 +1,29 @@
+.sala {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fila {
+    display: flex;
+    justify-content: center; /* Centra los asientos en la fila */
+    gap: 10px; /* Espacio entre asientos */
+}
+
+.asiento {
+    width: 40px;
+    height: 40px;
+    background-color: gray; /* Color por defecto */
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px; /* Centrado del texto verticalmente */
+    transition: background-color 0.3s; /* Transición suave */
+}
+
+.disponible {
+    background-color: green; /* Color para asientos disponibles */
+}
+
+.seleccionado {
+    background-color: yellow; /* Color para asientos seleccionados */
+}

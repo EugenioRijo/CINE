@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ pelicula.titulo }} - Detalles</title>
 </head>
+
 <body>
-    <h1>{{ pelicula.titulo }} ({{ pelicula.anio }})</h1>
-    <p><strong>Descripción:</strong> {{ pelicula.descripcion }}</p>
-    <p><strong>Hora:</strong> {{ pelicula.hora }}</p>
-    <p><strong>Sala:</strong> {{ pelicula.sala }}</p>
-    <a href="/cartelera">Volver a la cartelera</a>
+    <h1>{{ pelicula.titulo }}</h1>
+    <p><strong>Sinopsis:</strong> {{ pelicula.sinopsis }}</p> <!-- Asumido basado en tu definición anterior -->
+
+    <h2>Horarios Disponibles:</h2>
+    <ul>
+        {% for horario in horarios[pelicula.id] %} <!-- Asegúrate de que esto ahora funciona -->
+            <li>
+                {{ horario.hora }} - Sala: {{ horario.sala }}
+                <a href="{{ url_for('comprar', pelicula_id=pelicula.id) }}">Comprar Entradas</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('cartelera') }}">Volver a la cartelera</a>
 </body>
+
 </html>

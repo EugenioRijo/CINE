@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmación de Reserva</title>
+</head>
+<body>
+    <h1>Confirmación de Asientos Reservados</h1>
+    <p>Los siguientes asientos han sido reservados:</p>
+    <ul>
+        {% for asiento in asientos %}
+            <li>{{ asiento }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Volver a la página principal</a>
+</body>
+</html>
