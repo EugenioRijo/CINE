@@ -34,25 +34,30 @@ def crear_usuario():
         JSON: Datos del usuario creado
         Status: 201 si es exitoso, 400 si hay error
     """
-    data = request.get_json()
-    
-    if not all(k in data for k in ['nombre', 'email', 'password']):
-        return jsonify({'error': 'Faltan datos requeridos'}), 400
-    
-    usuario, error = UsuarioHelper.registrar_usuario(
-        nombre=data['nombre'],
-        email=data['email'],
-        password=data['password']
-    )
-    
-    if error:
-        return jsonify({'error': error}), 400
-    
-    return jsonify({
-        'id': usuario.id,
-        'nombre': usuario.nombre,
-        'email': usuario.email
-    }), 201
+    try:
+        data = request.get_json()
+        
+        # Validar que se recibieron todos los campos necesarios
+        if not all(k in data for k in ['nombre', 'email', 'password']):
+            return jsonify({'error': 'Faltan datos requeridos'}), 400
+        
+        # Intentar registrar el usuario
+        usuario, error = UsuarioHelper.registrar_usuario(
+            nombre=data['nombre'],
+            email=data['email'],
+            password=data['password']
+        )
+        
+        if error:
+            return jsonify({'error': error}), 400
+        
+        return jsonify({
+            'mensaje': 'Usuario registrado exitosamente',
+            'usuario': usuario.to_dict()
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @usuario_bp.route('/<int:usuario_id>', methods=['GET'])
 def obtener_usuario(usuario_id):
@@ -66,13 +71,13 @@ def obtener_usuario(usuario_id):
         JSON: Datos del usuario
         Status: 200 si existe, 404 si no se encuentra
     """
-    usuario = UsuarioRepository.get_by_id(usuario_id)
-    
-    if not usuario:
-        return jsonify({'error': 'Usuario no encontrado'}), 404
-    
-    return jsonify({
-        'id': usuario.id,
-        'nombre': usuario.nombre,
-        'email': usuario.email
-    }) 
+    try:
+        usuario = UsuarioRepository.get_by_id(usuario_id)
+        
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        
+        return jsonify(usuario.to_dict())
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500 

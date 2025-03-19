@@ -13,6 +13,7 @@ Define la estructura y comportamiento de la entidad Usuario en la base de datos.
 
 from config.database import db
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Usuario(db.Model):
     """
@@ -28,12 +29,35 @@ class Usuario(db.Model):
     """
     __tablename__ = 'usuarios'
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __init__(self, nombre, email, password):
+        self.nombre = nombre
+        self.email = email
+        self.set_password(password)
+    
+    def set_password(self, password):
+        """Establece la contraseña del usuario"""
+        self.password = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Verifica la contraseña del usuario"""
+        return check_password_hash(self.password, password)
+    
+    def to_dict(self):
+        """Convierte el usuario a diccionario"""
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'email': self.email,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
     
     def __repr__(self):
         return f'<Usuario {self.email}>' 

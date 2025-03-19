@@ -14,6 +14,8 @@ Implementa la lógica de negocio relacionada con los usuarios.
 
 from repositories.usuario_repository import UsuarioRepository
 from werkzeug.security import generate_password_hash
+from models.usuario import Usuario
+from config.database import db
 
 class UsuarioHelper:
     """
@@ -29,29 +31,32 @@ class UsuarioHelper:
         Args:
             nombre (str): Nombre del usuario
             email (str): Email del usuario
-            password (str): Contraseña sin hashear
+            password (str): Contraseña del usuario
             
         Returns:
-            tuple: (Usuario, error_message)
-            - Si el registro es exitoso: (usuario, None)
-            - Si hay error: (None, mensaje_error)
+            tuple: (Usuario, str) - Usuario creado y mensaje de error (si existe)
         """
-        # Verificar si el usuario ya existe
-        if UsuarioRepository.get_by_email(email):
-            return None, "El email ya está registrado"
-        
-        # Hashear el password
-        hashed_password = generate_password_hash(password)
-        
-        # Crear el usuario
         try:
-            usuario = UsuarioRepository.create(
+            # Verificar si el usuario ya existe
+            usuario_existente = Usuario.query.filter_by(email=email).first()
+            if usuario_existente:
+                return None, "El email ya está registrado"
+            
+            # Crear nuevo usuario
+            nuevo_usuario = Usuario(
                 nombre=nombre,
                 email=email,
-                password=hashed_password
+                password=password
             )
-            return usuario, None
+            
+            # Guardar en la base de datos
+            db.session.add(nuevo_usuario)
+            db.session.commit()
+            
+            return nuevo_usuario, None
+            
         except Exception as e:
+            db.session.rollback()
             return None, str(e)
     
     @staticmethod
