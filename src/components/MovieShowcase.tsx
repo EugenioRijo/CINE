@@ -110,15 +110,15 @@ const ThemeToggle = styled(IconButton)(({ theme }) => ({
 }));
 
 const mockMovies: Movie[] = [
-  { id: 1, title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl: '/movies/captain-america.jpg', isTop: true },
-  { id: 2, title: 'MICKEY 17', imageUrl: '/movies/mickey17.jpg', isTop: true },
-  { id: 3, title: 'FLOW', imageUrl: '/movies/flow.jpg', isTop: true },
-  { id: 4, title: 'MUFASA EL REY LEON', imageUrl: '/movies/mufasa.jpg', isTop: true },
-  { id: 5, title: 'EL MONO', imageUrl: '/movies/el-mono.jpg', isTop: true },
+  { id: 1, title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl: '/img/civilw.jpg', isTop: true },
+  { id: 2, title: 'MICKEY 17', imageUrl: '/img/my17.jpg', isTop: true },
+  { id: 3, title: 'FLOW', imageUrl: '/img/flow.jpg', isTop: true },
+  { id: 4, title: 'MUFASA EL REY LEON', imageUrl: '/img/mufasa.jpg', isTop: true },
+  { id: 5, title: 'EL MONO', imageUrl: '/img/elmono.jpg', isTop: true },
   // Películas regulares
-  { id: 6, title: 'BLANCANIEVES', imageUrl: '/movies/blancanieves.jpg' },
-  { id: 7, title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl: '/movies/aot.jpg' },
-  { id: 8, title: 'SONIC 3 LA PELICULA', imageUrl: '/movies/sonic3.jpg' },
+  { id: 6, title: 'BLANCANIEVES', imageUrl: '/img/blanca.jpg' },
+  { id: 7, title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl: '/img/titan.jpg' },
+  { id: 8, title: 'SONIC 3 LA PELICULA', imageUrl: '/img/sonic3.jpg' },
   // Añade más películas aquí...
 ];
 
