@@ -110,7 +110,7 @@ const ThemeToggle = styled(IconButton)(({ theme }) => ({
 }));
 
 const mockMovies: Movie[] = [
-  { id: 1, title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl: '/img/civilw.jpg', isTop: true },
+  { id: 1, title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl: '/img/capitan.jpg', isTop: true },
   { id: 2, title: 'MICKEY 17', imageUrl: '/img/my17.jpg', isTop: true },
   { id: 3, title: 'FLOW', imageUrl: '/img/flow.jpg', isTop: true },
   { id: 4, title: 'MUFASA EL REY LEON', imageUrl: '/img/mufasa.jpg', isTop: true },
