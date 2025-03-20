@@ -123,7 +123,7 @@ const movies = [
   },
   {
     title: 'Deadpool & Wolverine',
-    image: '/img/deadpool.jpg',
+    image: '/img/deapool.jpg',
     year: '2024',
     duration: '2h 30min',
     genre: 'Acción/Comedia',
