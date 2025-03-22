@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartelera de Películas</title>
+</head>
+
+<body>
+    <h1>Cartelera de Películas</h1>
+    <ul>
+        {% for index, pelicula in peliculas|enumerate %}
+            <li>
+                <a href="/pelicula/{{ index }}">{{ pelicula.titulo }} ({{ pelicula.anio }})</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Volver a la bienvenida</a>
+</body>
+
+</html>
+
