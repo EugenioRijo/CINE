@@ -1,59 +1,58 @@
 """
 Rutas de autenticación
-Este módulo maneja las rutas relacionadas con la autenticación de usuarios
+Este módulo maneja el registro y autenticación de clientes
 """
 
 from flask import Blueprint, request, jsonify
-from models.usuario import Usuario
+from models.cliente import Cliente
 from config.database import db
 from werkzeug.security import generate_password_hash
 
+# Crear el blueprint primero
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/registro', methods=['POST'])
-def registro():
+def registro_cliente():
     """
-    Ruta para registrar un nuevo usuario
+    Ruta para registrar un nuevo cliente
     """
     try:
         data = request.get_json()
         
-        # Validar que se recibieron todos los campos necesarios
-        if not all(k in data for k in ['email', 'password', 'nombre']):
-            return jsonify({'error': 'Faltan datos requeridos'}), 400
+        # Validar campos requeridos
+        required_fields = ['nombre', 'email', 'password']
+        if not all(k in data for k in required_fields):
+            return jsonify({'error': f'Faltan campos requeridos: {required_fields}'}), 400
             
-        # Verificar si el usuario ya existe
-        if Usuario.query.filter_by(email=data['email']).first():
+        # Verificar si el cliente ya existe
+        if Cliente.query.filter_by(email=data['email']).first():
             return jsonify({'error': 'El email ya está registrado'}), 400
             
-        # Crear nuevo usuario
-        nuevo_usuario = Usuario(
-            email=data['email'],
+        # Crear nuevo cliente
+        nuevo_cliente = Cliente(
             nombre=data['nombre'],
-            password=generate_password_hash(data['password'])
+            email=data['email'],
+            password=generate_password_hash(data['password']),
+            telefono=data.get('telefono'),
+            es_miembro=data.get('es_miembro', False)
         )
         
-        db.session.add(nuevo_usuario)
+        db.session.add(nuevo_cliente)
         db.session.commit()
         
         return jsonify({
-            'mensaje': 'Usuario registrado exitosamente',
-            'usuario': {
-                'id': nuevo_usuario.id,
-                'email': nuevo_usuario.email,
-                'nombre': nuevo_usuario.nombre
+            'mensaje': 'Cliente registrado exitosamente',
+            'cliente': {
+                'id': nuevo_cliente.id,
+                'nombre': nuevo_cliente.nombre,
+                'email': nuevo_cliente.email
             }
         }), 201
         
     except Exception as e:
         db.session.rollback()
-        print(f"Error en registro: {str(e)}")  # Para debugging
-        return jsonify({'error': 'Error al registrar usuario'}), 500
+        return jsonify({'error': str(e)}), 500
 
-# Ruta de prueba
 @auth_bp.route('/test', methods=['GET'])
 def test():
-    """
-    Ruta de prueba para verificar que el blueprint está funcionando
-    """
-    return jsonify({'mensaje': 'Auth routes funcionando correctamente'}) 
+    return jsonify({'mensaje': 'Auth routes funcionando correctamente'})
