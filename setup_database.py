@@ -3,7 +3,7 @@ Script para configurar la base de datos
 """
 from flask import Flask
 from config.database import db
-from models.clientes import Cliente  # Cambiamos el modelo
+from models.usuario import Usuario
 import pymysql
 
 def create_database():
@@ -23,24 +23,23 @@ def create_database():
             # Usar la base de datos
             cursor.execute("USE cine_db")
             
-            # Eliminar la tabla si existe (ahora clientes)
-            cursor.execute("DROP TABLE IF EXISTS clientes")  # Cambio aquí
+            # Eliminar la tabla si existe
+            cursor.execute("DROP TABLE IF EXISTS usuarios")
             
-            # Crear la tabla clientes desde cero (según tu estructura SQL)
+            # Crear la tabla desde cero
             cursor.execute("""
-            CREATE TABLE clientes (
+            CREATE TABLE usuarios (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 nombre VARCHAR(100) NOT NULL,
-                email VARCHAR(120),
-                telefono VARCHAR(20),
-                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                es_miembro TINYINT(1) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                email VARCHAR(120) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-            """)  # Estructura adaptada a tu SQL
+            """)
             
             connection.commit()
-            print("✅ Tabla 'clientes' creada correctamente")  # Mensaje actualizado
+            print("✅ Tabla 'usuarios' creada correctamente")
             
         connection.close()
         return True
@@ -60,22 +59,13 @@ def verify_table_structure():
         )
         
         with connection.cursor() as cursor:
-            # Verificar la estructura de la tabla CLIENTES
-            cursor.execute("DESCRIBE clientes")  # Cambio aquí
+            # Verificar la estructura de la tabla
+            cursor.execute("DESCRIBE usuarios")
             columns = {row[0] for row in cursor.fetchall()}
-            # Columnas según tu estructura SQL
-            required_columns = {
-                'id', 
-                'nombre', 
-                'email', 
-                'telefono', 
-                'fecha_registro', 
-                'es_miembro', 
-                'created_at'
-            }
+            required_columns = {'id', 'nombre', 'email', 'password', 'created_at', 'updated_at'}
             
             if not required_columns.issubset(columns):
-                print("❌ Error: Faltan columnas en la tabla 'clientes'")
+                print("❌ Error: Faltan columnas en la tabla 'usuarios'")
                 print(f"Columnas faltantes: {required_columns - columns}")
                 return False
                 
@@ -109,12 +99,12 @@ def setup_database():
     
     with app.app_context():
         try:
-            # Verificar que SQLAlchemy puede interactuar con la tabla CLIENTES
-            cliente_prueba = Cliente.query.first()  # Cambio aquí
+            # Verificar que SQLAlchemy puede interactuar con la tabla
+            usuario_prueba = Usuario.query.first()
             print("✅ Conexión con SQLAlchemy verificada correctamente")
                 
         except Exception as e:
             print(f"❌ Error al verificar la conexión con SQLAlchemy: {str(e)}")
             
 if __name__ == "__main__":
-    setup_database()
+    setup_database() 
