@@ -119,7 +119,7 @@ const mockMovies: Movie[] = [
   {
     id: 1,
     title: 'DUNE: PARTE DOS',
-    imageUrl: '/img/dune2.jpg',
+    imageUrl: '/img/dune.jpg',
     isTop: true,
     duration: 166,
     description: 'Paul Atreides se une a los Fremen y emprende un camino de venganza contra los conspiradores que destruyeron a su familia.',
@@ -139,7 +139,7 @@ const mockMovies: Movie[] = [
   {
     id: 3,
     title: 'GHOSTBUSTERS: IMPERIO HELADO',
-    imageUrl: '/img/ghostbusters.jpg',
+    imageUrl: '/img/ghost.jpg',
     isTop: true,
     duration: 115,
     description: 'La familia Spengler regresa a donde comenzó todo: la icónica estación de bomberos de Nueva York.',
@@ -214,7 +214,7 @@ const mockMovies: Movie[] = [
   },
   {
     id: 11,
-    title: 'TODOS MENOS TÚ',
+    title: 'TODAS MENOS TÚ',
     imageUrl: '/img/todosmenos.jpg',
     duration: 104,
     description: 'Una comedia romántica sobre dos personas que se odian pero deben fingir ser pareja.',
