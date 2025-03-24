@@ -132,7 +132,7 @@ const movies = [
   },
   {
     title: 'Kung Fu Panda 4',
-    image: '/img/panda.jpg',
+    image: '/img/kungfupanda4.jpg',
     year: '2024',
     duration: '1h 34min',
     genre: 'Animación',
@@ -311,7 +311,9 @@ const WelcomePage: React.FC<WelcomePageProps> = ({
                   image={movie.image}
                   alt={movie.title}
                   sx={{
-                    objectFit: 'cover',
+                    objectFit: 'contain',
+                    //objectFit: 'scale-down',
+                    //width: '100%',
                     transition: 'transform 0.3s ease-in-out',
                     '&:hover': {
                       transform: 'scale(1.05)',

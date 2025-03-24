@@ -129,7 +129,7 @@ const mockMovies: Movie[] = [
   {
     id: 2,
     title: 'KUNG FU PANDA 4',
-    imageUrl: '/img/kungfu4.jpg',
+    imageUrl: '/img/kungfupanda4.jpg',
     isTop: true,
     duration: 94,
     description: 'Po debe entrenar a una nueva guerrera mientras enfrenta a una poderosa hechicera que busca controlar el reino espiritual.',
