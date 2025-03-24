@@ -211,14 +211,37 @@ function Install-Dependencies {
     Write-Host "Instalando dependencias del frontend..." -ForegroundColor Yellow
     try {
         Push-Location front
+        Write-Host "Limpiando instalaciones previas..." -ForegroundColor Yellow
+        Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
+        Remove-Item package-lock.json -ErrorAction SilentlyContinue
+        
         Write-Host "Instalando dependencias base..." -ForegroundColor Yellow
         npm install --legacy-peer-deps
         
-        Write-Host "Instalando tipos de TypeScript y dependencias adicionales..." -ForegroundColor Yellow
-        npm install --save --legacy-peer-deps react-router-dom@6.22.0 @mui/material@5.15.10 @mui/icons-material@5.15.10 @emotion/react@11.11.3 @emotion/styled@11.11.0 next-themes@0.4.6 ajv@8.12.0 ajv-keywords@5.1.0 styled-components@6.1.8 web-vitals@2.1.4
+        Write-Host "Instalando dependencias principales..." -ForegroundColor Yellow
+        $dependencies = @(
+            "react-router-dom@6.22.0",
+            "@mui/material@5.15.10",
+            "@mui/icons-material@5.15.10",
+            "@emotion/react@11.11.3",
+            "@emotion/styled@11.11.0",
+            "next-themes@0.4.6",
+            "ajv@8.12.0",
+            "ajv-keywords@5.1.0",
+            "styled-components@6.1.8",
+            "web-vitals@2.1.4"
+        )
+        npm install --save --legacy-peer-deps $dependencies
         
-        Write-Host "Instalando tipos de desarrollo..." -ForegroundColor Yellow
-        npm install --save-dev --legacy-peer-deps typescript@4.9.5 @types/react@18.2.55 @types/react-dom@18.2.19 @types/styled-components@5.1.34 @types/react-router-dom@6.11.0
+        Write-Host "Instalando dependencias de desarrollo..." -ForegroundColor Yellow
+        $devDependencies = @(
+            "typescript@4.9.5",
+            "@types/react@18.2.55",
+            "@types/react-dom@18.2.19",
+            "@types/styled-components@5.1.34",
+            "@types/react-router-dom@6.22.0"
+        )
+        npm install --save-dev --legacy-peer-deps $devDependencies
     }
     catch {
         Write-Host "Error durante la instalación de dependencias del frontend: $_" -ForegroundColor Red
