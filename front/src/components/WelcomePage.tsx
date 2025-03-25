@@ -312,7 +312,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({
                   alt={movie.title}
                   sx={{
                     objectFit: 'contain',
-                    //objectFit: 'scale-down',
+                    //objectFit: 'scale-down', no tocar (vista completa)
                     //width: '100%',
                     transition: 'transform 0.3s ease-in-out',
                     '&:hover': {
