@@ -283,7 +283,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Cometa',
     description: 'Palomitas de maíz con mantequilla',
     price: 5.99,
-    image: '/img/mediana.jpg',
+    image: '/img/cometa.jpg',
     size: 'M',
     category: 'popcorn',
     quantity: 0
@@ -293,7 +293,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Supernova',
     description: 'Palomitas de maíz con mantequilla',
     price: 7.99,
-    image: '/img/grandes.jpg',
+    image: '/img/nova.jpg',
     size: 'L',
     category: 'popcorn',
     quantity: 0
