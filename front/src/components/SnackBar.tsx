@@ -191,7 +191,7 @@ const drinks: Product[] = [
     name: 'Pepsi Orbital',
     description: 'Refresco Pepsi',
     price: 3.99,
-    image: '/img/pepsi.jpg',
+    image: '/img/pepsi.png',
     size: 'M',
     category: 'drinks',
     quantity: 0
@@ -252,7 +252,7 @@ const snacks: Product[] = [
     name: 'Hot Dog Espacial',
     description: 'Hot dog con papitas y salsas',
     price: 5.99,
-    image: '/img/hotdog.jpg',
+    image: '/img/perrohot.jpg',
     category: 'snacks',
     quantity: 0
   },
@@ -273,7 +273,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Polvo Estelar',
     description: 'Palomitas de maíz con mantequilla',
     price: 4.99,
-    image: '/img/popcorn-small.jpg',
+    image: '/img/polvo.jpg',
     size: 'S',
     category: 'popcorn',
     quantity: 0
@@ -283,7 +283,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Cometa',
     description: 'Palomitas de maíz con mantequilla',
     price: 5.99,
-    image: '/img/popcorn-medium.jpg',
+    image: '/img/mediana.jpg',
     size: 'M',
     category: 'popcorn',
     quantity: 0
@@ -293,7 +293,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Supernova',
     description: 'Palomitas de maíz con mantequilla',
     price: 7.99,
-    image: '/img/popcorn-large.jpg',
+    image: '/img/grandes.jpg',
     size: 'L',
     category: 'popcorn',
     quantity: 0
@@ -303,7 +303,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Agujero Negro',
     description: 'Palomitas de maíz con caramelo',
     price: 8.99,
-    image: '/img/popcorn-caramel.jpg',
+    image: '/img/negro.png',
     size: 'L',
     category: 'popcorn',
     quantity: 0
