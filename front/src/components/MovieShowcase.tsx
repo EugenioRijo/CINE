@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -14,12 +14,17 @@ import {
 import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import Navbar from './Navbar';
+import MovieDetails from './MovieDetails';
 
 interface Movie {
   id: number;
   title: string;
   imageUrl: string;
   isTop?: boolean;
+  duration: number;
+  description: string;
+  genre: string[];
+  rating: string;
 }
 
 interface MovieShowcaseProps {
@@ -110,21 +115,163 @@ const ThemeToggle = styled(IconButton)(({ theme }) => ({
 }));
 
 const mockMovies: Movie[] = [
-  { id: 1, title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl: '/img/capitan.jpg', isTop: true },
-  { id: 2, title: 'MICKEY 17', imageUrl: '/img/my17.jpg', isTop: true },
-  { id: 3, title: 'FLOW', imageUrl: '/img/flow.jpg', isTop: true },
-  { id: 4, title: 'MUFASA EL REY LEON', imageUrl: '/img/mufasa.jpg', isTop: true },
-  { id: 5, title: 'EL MONO', imageUrl: '/img/elmono.jpg', isTop: true },
+  // TOP 5 - Películas destacadas
+  {
+    id: 1,
+    title: 'DUNE: PARTE DOS',
+    imageUrl: '/img/dune.jpg',
+    isTop: true,
+    duration: 166,
+    description: 'Paul Atreides se une a los Fremen y emprende un camino de venganza contra los conspiradores que destruyeron a su familia.',
+    genre: ['Ciencia Ficción', 'Aventura', 'Drama'],
+    rating: 'PG-13'
+  },
+  {
+    id: 2,
+    title: 'KUNG FU PANDA 4',
+    imageUrl: '/img/kungfupanda4.jpg',
+    isTop: true,
+    duration: 94,
+    description: 'Po debe entrenar a una nueva guerrera mientras enfrenta a una poderosa hechicera que busca controlar el reino espiritual.',
+    genre: ['Animación', 'Comedia', 'Acción'],
+    rating: 'PG'
+  },
+  {
+    id: 3,
+    title: 'GHOSTBUSTERS: IMPERIO HELADO',
+    imageUrl: '/img/ghost.jpg',
+    isTop: true,
+    duration: 115,
+    description: 'La familia Spengler regresa a donde comenzó todo: la icónica estación de bomberos de Nueva York.',
+    genre: ['Comedia', 'Aventura', 'Fantasía'],
+    rating: 'PG-13'
+  },
+  {
+    id: 4,
+    title: 'MADAME WEB',
+    imageUrl: '/img/madameweb.jpg',
+    isTop: true,
+    duration: 116,
+    description: 'Cassandra Webb desarrolla el poder de ver el futuro y debe proteger a tres jóvenes de un adversario mortal.',
+    genre: ['Acción', 'Aventura', 'Ciencia Ficción'],
+    rating: 'PG-13'
+  },
+  {
+    id: 5,
+    title: 'BOB MARLEY: ONE LOVE',
+    imageUrl: '/img/bobmarley.jpg',
+    isTop: true,
+    duration: 107,
+    description: 'La historia del icónico músico que inspiró a generaciones a través de su mensaje de amor y unidad.',
+    genre: ['Drama', 'Biografía', 'Musical'],
+    rating: 'PG-13'
+  },
   // Películas regulares
-  { id: 6, title: 'BLANCANIEVES', imageUrl: '/img/blanca.jpg' },
-  { id: 7, title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl: '/img/titan.jpg' },
-  { id: 8, title: 'SONIC 3 LA PELICULA', imageUrl: '/img/sonic3.jpg' },
-  // Añade más películas aquí...
+  {
+    id: 6,
+    title: 'DEMON SLAYER: KIMETSU NO YAIBA',
+    imageUrl: '/img/demonslayer.jpg',
+    duration: 110,
+    description: 'La última misión de Tanjiro lo lleva a enfrentar a poderosos demonios en el Distrito de la Herrería.',
+    genre: ['Anime', 'Acción', 'Fantasía'],
+    rating: 'PG-13'
+  },
+  {
+    id: 7,
+    title: 'IMAGINARY',
+    imageUrl: '/img/imaginary.jpg',
+    duration: 104,
+    description: 'Una mujer descubre que el oso de peluche de su infancia es una entidad terrorífica.',
+    genre: ['Terror', 'Suspenso'],
+    rating: 'PG-13'
+  },
+  {
+    id: 8,
+    title: 'ARTHUR EL REY',
+    imageUrl: '/img/arthur.jpg',
+    duration: 120,
+    description: 'Una nueva visión de la leyenda del Rey Arturo, llena de acción y aventura.',
+    genre: ['Aventura', 'Fantasía', 'Acción'],
+    rating: 'PG-13'
+  },
+  {
+    id: 9,
+    title: 'HÉROE POR ENCARGO',
+    imageUrl: '/img/heroe.jpg',
+    duration: 98,
+    description: 'Un ex militar se convierte en héroe inesperado cuando debe proteger a una familia.',
+    genre: ['Acción', 'Suspenso'],
+    rating: 'R'
+  },
+  {
+    id: 10,
+    title: 'VIDAS PASADAS',
+    imageUrl: '/img/vidaspasadas.jpg',
+    duration: 106,
+    description: 'Una historia de amor que atraviesa el tiempo y las culturas.',
+    genre: ['Drama', 'Romance'],
+    rating: 'PG-13'
+  },
+  {
+    id: 11,
+    title: 'TODAS MENOS TÚ',
+    imageUrl: '/img/todosmenos.jpg',
+    duration: 104,
+    description: 'Una comedia romántica sobre dos personas que se odian pero deben fingir ser pareja.',
+    genre: ['Comedia', 'Romance'],
+    rating: 'PG-13'
+  },
+  {
+    id: 12,
+    title: 'POBRES CRIATURAS',
+    imageUrl: '/img/pobrescriaturas.jpg',
+    duration: 141,
+    description: 'La historia de Bella Baxter, una joven revivida por un científico brillante.',
+    genre: ['Drama', 'Ciencia Ficción', 'Romance'],
+    rating: 'R'
+  },
+  {
+    id: 13,
+    title: 'ARGYLLE',
+    imageUrl: '/img/argylle.jpg',
+    duration: 139,
+    description: 'Una autora de espías se ve envuelta en una conspiración real de espionaje.',
+    genre: ['Acción', 'Suspenso', 'Comedia'],
+    rating: 'PG-13'
+  },
+  {
+    id: 14,
+    title: 'CHICAS PESADAS',
+    imageUrl: '/img/chicaspesadas.jpg',
+    duration: 112,
+    description: 'Un nuevo remake del clásico de comedia adolescente para una nueva generación.',
+    genre: ['Comedia', 'Drama'],
+    rating: 'PG-13'
+  },
+  {
+    id: 15,
+    title: 'WONKA',
+    imageUrl: '/img/wonka.jpg',
+    duration: 116,
+    description: 'La historia del joven Willy Wonka y cómo se convirtió en el famoso chocolatero.',
+    genre: ['Fantasía', 'Aventura', 'Musical'],
+    rating: 'PG'
+  }
 ];
 
 const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => {
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const topMovies = mockMovies.filter(movie => movie.isTop);
   const regularMovies = mockMovies.filter(movie => !movie.isTop);
+
+  if (selectedMovie) {
+    return (
+      <MovieDetails
+        mode={mode}
+        movie={selectedMovie}
+      />
+    );
+  }
 
   return (
     <StyledContainer>
@@ -160,7 +307,12 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
                   <Typography variant="h6" align="center" sx={{ color: 'white', fontWeight: 600 }}>
                     {movie.title}
                   </Typography>
-                  <BuyButton variant="contained">COMPRAR</BuyButton>
+                  <BuyButton
+                    variant="contained"
+                    onClick={() => setSelectedMovie(movie)}
+                  >
+                    COMPRAR
+                  </BuyButton>
                 </MovieOverlay>
               </MovieCard>
             </Grid>
@@ -178,7 +330,12 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
                   <Typography variant="h6" align="center" sx={{ color: 'white', fontWeight: 600 }}>
                     {movie.title}
                   </Typography>
-                  <BuyButton variant="contained">COMPRAR</BuyButton>
+                  <BuyButton
+                    variant="contained"
+                    onClick={() => setSelectedMovie(movie)}
+                  >
+                    COMPRAR
+                  </BuyButton>
                 </MovieOverlay>
               </MovieCard>
             </Grid>

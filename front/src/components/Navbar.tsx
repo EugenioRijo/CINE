@@ -42,7 +42,8 @@ const StyledToolbar = styled(Toolbar)({
 
 const NavButton = styled(Button)(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#ffffff' : '#333333',
-  margin: theme.spacing(0, 1),
+  marginLeft: theme.spacing(1),
+  marginRight: theme.spacing(1),
   '&:hover': {
     background: theme.palette.mode === 'dark'
       ? 'rgba(3, 181, 252, 0.1)'

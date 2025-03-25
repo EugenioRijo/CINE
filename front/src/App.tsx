@@ -1,35 +1,40 @@
 import React, { useState } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate
+} from 'react-router-dom';
 import WelcomePage from './components/WelcomePage';
 import MovieShowcase from './components/MovieShowcase';
 import SignInSide from './SignInSide';
-import { Box } from '@mui/material';
+import { SnackBar } from './components/SnackBar';
+import NotFound from './components/NotFound';
 
 const AppContent = () => {
-  const [mode, setMode] = useState<'dark' | 'light'>('dark');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
 
   const theme = createTheme({
     palette: {
-      mode,
+      mode: isDarkMode ? 'dark' : 'light',
       primary: {
-        main: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+        main: isDarkMode ? '#03b5fc' : '#ff8c32',
       },
       secondary: {
-        main: mode === 'dark' ? '#1a2dd8' : '#ffaa50',
+        main: isDarkMode ? '#1a2dd8' : '#ffaa50',
       },
       background: {
-        default: mode === 'dark' ? '#0a192f' : '#f0f8ff',
-        paper: mode === 'dark' ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+        default: isDarkMode ? '#0a192f' : '#f0f8ff',
+        paper: isDarkMode ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)',
       },
     },
     components: {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            background: mode === 'dark'
+            background: isDarkMode
               ? 'linear-gradient(135deg, #0a192f 0%, #000000 100%)'
               : 'linear-gradient(135deg, #f0f8ff 0%, #87ceeb 100%)',
             minHeight: '100vh',
@@ -42,7 +47,7 @@ const AppContent = () => {
   });
 
   const handleModeChange = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setMode((prevMode) => (prevMode === 'dark' ? 'light' : 'dark'));
+    setIsDarkMode((prevMode) => !prevMode);
   };
 
   const handleStartJourney = () => {
@@ -56,26 +61,31 @@ const AppContent = () => {
         <Routes>
           <Route
             path="/"
-            element={<WelcomePage mode={mode} onStartJourney={handleStartJourney} onModeChange={handleModeChange} />}
+            element={<WelcomePage mode={isDarkMode ? 'dark' : 'light'} onStartJourney={handleStartJourney} onModeChange={handleModeChange} />}
           />
           <Route
             path="/cartelera"
-            element={<MovieShowcase mode={mode} onModeChange={handleModeChange} />}
+            element={<MovieShowcase mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
           />
           <Route
             path="/login"
-            element={<SignInSide mode={mode} onModeChange={handleModeChange} />}
+            element={<SignInSide mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+          />
+          <Route
+            path="*"
+            element={<NotFound mode={isDarkMode ? 'dark' : 'light'} />}
           />
         </Routes>
       </Box>
+      <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
     </ThemeProvider>
   );
 };
 
 export default function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <AppContent />
-    </Router>
+    </BrowserRouter>
   );
 } 

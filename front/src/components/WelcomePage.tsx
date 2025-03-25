@@ -12,9 +12,11 @@ import {
   keyframes,
   IconButton,
 } from '@mui/material';
-import { RocketLaunch, Movie, TheaterComedy, LocalActivity } from '@mui/icons-material';
-import Brightness4 from '@mui/icons-material/Brightness4';
-import Brightness7 from '@mui/icons-material/Brightness7';
+import MovieIcon from '@mui/icons-material/Movie';
+import TheaterComedyIcon from '@mui/icons-material/TheaterComedy';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
@@ -97,17 +99,17 @@ const MovieCard = styled(Card)<{ mode: 'dark' | 'light' }>(({ mode }) => ({
 
 const features = [
   {
-    icon: <Movie sx={{ fontSize: 40 }} />,
+    icon: <MovieIcon sx={{ fontSize: 40 }} />,
     title: 'Últimos Estrenos',
     description: 'Descubre las películas más esperadas del momento.',
   },
   {
-    icon: <TheaterComedy sx={{ fontSize: 40 }} />,
+    icon: <TheaterComedyIcon sx={{ fontSize: 40 }} />,
     title: 'Salas Premium',
     description: 'Experiencia cinematográfica de primera clase.',
   },
   {
-    icon: <LocalActivity sx={{ fontSize: 40 }} />,
+    icon: <LocalActivityIcon sx={{ fontSize: 40 }} />,
     title: 'Eventos Especiales',
     description: 'Maratones y pre-estrenos exclusivos.',
   },
@@ -130,7 +132,7 @@ const movies = [
   },
   {
     title: 'Kung Fu Panda 4',
-    image: '/img/panda.jpg',
+    image: '/img/kungfupanda4.jpg',
     year: '2024',
     duration: '1h 34min',
     genre: 'Animación',
@@ -215,7 +217,10 @@ const Subtitle = styled(Typography)(({ theme }) => ({
 }));
 
 const StartButton = styled(Button)(({ theme }) => ({
-  padding: theme.spacing(2, 4),
+  paddingLeft: theme.spacing(4),
+  paddingRight: theme.spacing(4),
+  paddingTop: theme.spacing(2),
+  paddingBottom: theme.spacing(2),
   fontSize: '1.2rem',
   borderRadius: 30,
   background: theme.palette.mode === 'dark'
@@ -262,7 +267,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({
     <StyledContainer mode={mode}>
       <Navbar />
       <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
-        {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+        {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
       </ThemeToggle>
       <LogoContainer>
         <Logo src="/planeta-cinema-logo.png" alt="Planeta Cinema Logo" />
@@ -306,7 +311,9 @@ const WelcomePage: React.FC<WelcomePageProps> = ({
                   image={movie.image}
                   alt={movie.title}
                   sx={{
-                    objectFit: 'cover',
+                    objectFit: 'contain',
+                    //objectFit: 'scale-down', no tocar (vista completa)
+                    //width: '100%',
                     transition: 'transform 0.3s ease-in-out',
                     '&:hover': {
                       transform: 'scale(1.05)',
