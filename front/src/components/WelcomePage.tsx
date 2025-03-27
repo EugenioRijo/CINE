@@ -242,33 +242,10 @@ const StartButton = styled(Button)(({ theme }) => ({
   transition: 'all 0.3s ease-in-out',
 }));
 
-const ThemeToggle = styled(IconButton)(({ theme }) => ({
-  position: 'fixed',
-  top: 'calc(64px + 16px)',
-  right: theme.spacing(2),
-  color: theme.palette.mode === 'dark' ? 'white' : '#1a237e',
-  background: theme.palette.mode === 'dark'
-    ? 'rgba(3, 181, 252, 0.1)'
-    : 'rgba(255, 140, 50, 0.1)',
-  '&:hover': {
-    background: theme.palette.mode === 'dark'
-      ? 'rgba(3, 181, 252, 0.2)'
-      : 'rgba(255, 140, 50, 0.2)',
-  },
-  zIndex: 1000,
-}));
-
-const WelcomePage: React.FC<WelcomePageProps> = ({
-  mode,
-  onStartJourney,
-  onModeChange,
-}) => {
+const WelcomePage: React.FC<WelcomePageProps> = ({ mode, onStartJourney, onModeChange }) => {
   return (
     <StyledContainer mode={mode}>
-      <Navbar />
-      <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
-        {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-      </ThemeToggle>
+      <Navbar mode={mode} onModeChange={onModeChange} />
       <LogoContainer>
         <Logo src="/planeta-cinema-logo.png" alt="Planeta Cinema Logo" />
       </LogoContainer>

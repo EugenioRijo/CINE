@@ -189,7 +189,18 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
   };
 
   const handlePayment = () => {
-    navigate('/payment');
+    navigate('/payment', {
+      state: {
+        type: 'membership',
+        items: [
+          {
+            name: 'BH Member Mensual',
+            price: 10.00,
+            description: 'Membresía mensual',
+          }
+        ]
+      }
+    });
   };
 
   const benefits = [
