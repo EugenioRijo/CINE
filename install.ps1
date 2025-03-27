@@ -45,15 +45,24 @@ if (!(Test-Path "back/.env")) {
 Write-Host "📦 Instalando dependencias principales de Node.js..." -ForegroundColor Yellow
 npm install --legacy-peer-deps
 
+# Navegar al directorio front
+Set-Location -Path "front"
+
 # Instalar dependencias del frontend
-Write-Host "📦 Instalando dependencias del frontend..." -ForegroundColor Yellow
-Set-Location front
 npm install --legacy-peer-deps
-# Instalar tipos necesarios para TypeScript
-Write-Host "📦 Instalando tipos de TypeScript y dependencias adicionales..." -ForegroundColor Yellow
-npm install @types/styled-components@5.1.34 @types/react@18.2.55 @types/react-dom@18.2.19 @mui/material@5.15.10 @mui/icons-material@5.15.10 @emotion/react@11.11.3 @emotion/styled@11.11.0 next-themes@0.4.6 ajv@8.12.0 ajv-keywords@5.1.0 react-router-dom@6.22.0 styled-components@6.1.8 web-vitals@2.1.4 --save --legacy-peer-deps
-npm install @types/react-router-dom@5.3.3 --save-dev --legacy-peer-deps
-Set-Location ..
+
+# Instalar dependencias específicas
+Write-Host "📦 Instalando dependencias específicas..." -ForegroundColor Yellow
+npm install @types/styled-components@5.1.34 @types/react@18.2.55 @types/react-dom@18.2.19 @mui/material@5.15.10 @mui/icons-material@5.15.10 @emotion/react@11.11.3 @emotion/styled@11.11.0 next-themes@0.4.6 ajv@8.12.0 ajv-keywords@5.1.0 styled-components@6.1.8 web-vitals@2.1.4 --save --legacy-peer-deps
+
+# Instalar TypeScript
+npm install --save-dev typescript
+
+# Instalar React Router y sus tipos
+npm install react-router-dom @types/react-router-dom
+
+# Volver al directorio raíz
+Set-Location -Path ".."
 
 # Configurar la base de datos
 Write-Host "🗄️ Configurando la base de datos..." -ForegroundColor Yellow

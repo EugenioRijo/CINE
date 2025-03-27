@@ -11,6 +11,8 @@ import MovieShowcase from './components/MovieShowcase';
 import SignInSide from './SignInSide';
 import { SnackBar } from './components/SnackBar';
 import NotFound from './components/NotFound';
+import BHMember from './components/BHMember';
+import Payment from './components/Payment';
 
 const AppContent = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -70,6 +72,14 @@ const AppContent = () => {
           <Route
             path="/login"
             element={<SignInSide mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+          />
+          <Route
+            path="/bh-member"
+            element={<BHMember mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+          />
+          <Route
+            path="/payment"
+            element={<Payment mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
           />
           <Route
             path="*"

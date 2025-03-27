@@ -270,48 +270,199 @@ function Install-Dependencies {
 function Start-Servers {
     Write-Host "Iniciando servidores..." -ForegroundColor Cyan
 
-    if (-not (Test-VirtualEnv)) {
-        Write-Host "Activando entorno virtual..." -ForegroundColor Yellow
-        try {
-            . .\.venv\Scripts\Activate.ps1
-        }
-        catch {
-            Write-Host "Error al activar el entorno virtual. Asegurate de que este creado correctamente." -ForegroundColor Red
-            Write-Host "Puedes crearlo con: python -m venv .venv" -ForegroundColor Yellow
-            return
-        }
+    # Obtener la ruta absoluta del directorio actual
+    $rootPath = Get-Location
+
+    # Verificar si ya hay servidores corriendo y matarlos
+    Write-Host "Verificando procesos existentes..." -ForegroundColor Yellow
+    
+    # Detener procesos de Node.js (frontend)
+    Get-Process -Name "node" -ErrorAction SilentlyContinue | ForEach-Object {
+        Write-Host "Deteniendo proceso Node.js: $($_.Id)" -ForegroundColor Yellow
+        Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
     }
-
-    if (-not (Test-Path "back\server.py")) {
-        Write-Host "No se encuentra el archivo back/server.py" -ForegroundColor Red
-        return
+    
+    # Detener procesos de Python (backend)
+    Get-Process -Name "python" -ErrorAction SilentlyContinue | ForEach-Object {
+        Write-Host "Deteniendo proceso Python: $($_.Id)" -ForegroundColor Yellow
+        Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
     }
-
-    if (-not (Test-Path "front\package.json")) {
-        Write-Host "No se encuentra el archivo front/package.json" -ForegroundColor Red
-        return
-    }
-
-    if (-not (Test-Path "back\.env")) {
-        Write-Host "No se encuentra el archivo .env en el backend" -ForegroundColor Yellow
-        Write-Host "Copiando .env.example a .env..." -ForegroundColor Yellow
-        Copy-Item "back\.env.example" "back\.env" -ErrorAction SilentlyContinue
-        if (-not $?) {
-            Write-Host "Error al crear el archivo .env" -ForegroundColor Red
-            return
-        }
-    }
-
-    Write-Host "Iniciando el backend..." -ForegroundColor Green
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; . .\.venv\Scripts\Activate.ps1; python back/server.py"
-
+    
     Start-Sleep -Seconds 2
 
-    Write-Host "Iniciando el frontend..." -ForegroundColor Green
-    Set-Location front
-    npm start
+    # Verificar entorno virtual
+    if (-not (Test-VirtualEnv)) {
+        Write-Host "Activando entorno virtual..." -ForegroundColor Yellow
+        if (-not (Test-Path ".venv")) {
+            Write-Host "Creando nuevo entorno virtual..." -ForegroundColor Yellow
+            python -m venv .venv
+            if (-not $?) {
+                Write-Host "Error al crear el entorno virtual" -ForegroundColor Red
+                return
+            }
+        }
+        try {
+            Write-Host "Intentando activar entorno virtual en: $rootPath\.venv\Scripts\Activate.ps1" -ForegroundColor Yellow
+            . "$rootPath\.venv\Scripts\Activate.ps1"
+        }
+        catch {
+            Write-Host "Error al activar el entorno virtual: $_" -ForegroundColor Red
+            return
+        }
+    }
 
-    Get-Process -Name python | Where-Object {$_.MainWindowTitle -match "python back/server.py"} | Stop-Process
+    # Verificar dependencias de Python
+    Write-Host "Verificando dependencias de Python..." -ForegroundColor Yellow
+    if (-not (Test-Path "back\requirements.txt")) {
+        Write-Host "No se encuentra el archivo requirements.txt" -ForegroundColor Red
+        return
+    }
+    
+    try {
+        pip install -r back/requirements.txt
+    }
+    catch {
+        Write-Host "Error al instalar dependencias de Python: $_" -ForegroundColor Red
+        return
+    }
+
+    # Verificar y configurar .env
+    if (-not (Test-Path "back\.env")) {
+        Write-Host "Configurando archivo .env..." -ForegroundColor Yellow
+        if (Test-Path "back\.env.example") {
+            Copy-Item "back\.env.example" "back\.env" -Force
+        } else {
+            Write-Host "No se encuentra el archivo .env.example" -ForegroundColor Red
+            return
+        }
+    }
+
+    # Verificar dependencias de Node
+    Write-Host "Verificando dependencias de Node..." -ForegroundColor Yellow
+    if (-not (Test-Path "front\node_modules")) {
+        Write-Host "Instalando dependencias del frontend..." -ForegroundColor Yellow
+        Set-Location front
+        npm install --legacy-peer-deps
+        Set-Location $rootPath
+    }
+
+    # Matar procesos en los puertos si existen
+    Write-Host "Liberando puertos..." -ForegroundColor Yellow
+    $ports = @(3000, 5000)
+    foreach ($port in $ports) {
+        try {
+            $processId = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess
+            if ($processId) {
+                Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+            }
+        }
+        catch {
+            Write-Host "No hay proceso en el puerto $port" -ForegroundColor Green
+        }
+    }
+
+    # Iniciar backend
+    Write-Host "Iniciando backend..." -ForegroundColor Green
+    try {
+        $backendWindow = Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$rootPath'; . .\.venv\Scripts\Activate.ps1; python back/server.py" -PassThru -WindowStyle Normal
+        Start-Sleep -Seconds 5
+        
+        if (-not (Test-Port 5000)) {
+            Write-Host "Backend iniciado correctamente en el puerto 5000" -ForegroundColor Green
+        } else {
+            Write-Host "Error: El puerto 5000 está ocupado" -ForegroundColor Red
+            return
+        }
+    }
+    catch {
+        Write-Host "Error al iniciar el backend: $_" -ForegroundColor Red
+        return
+    }
+
+    # Iniciar frontend
+    Write-Host "Iniciando frontend..." -ForegroundColor Green
+    try {
+        Set-Location front
+        
+        # Verificar si existe package.json
+        if (-not (Test-Path "package.json")) {
+            Write-Host "Error: No se encuentra package.json en el directorio front" -ForegroundColor Red
+            Set-Location $rootPath
+            if ($backendWindow) {
+                Stop-Process -Id $backendWindow.Id -Force
+            }
+            return
+        }
+
+        # Verificar si existe node_modules
+        if (-not (Test-Path "node_modules")) {
+            Write-Host "Instalando dependencias del frontend..." -ForegroundColor Yellow
+            npm install --legacy-peer-deps
+            if (-not $?) {
+                Write-Host "Error al instalar dependencias del frontend" -ForegroundColor Red
+                Set-Location $rootPath
+                if ($backendWindow) {
+                    Stop-Process -Id $backendWindow.Id -Force
+                }
+                return
+            }
+        }
+
+        # Intentar iniciar el frontend con npm
+        Write-Host "Iniciando servidor de desarrollo React..." -ForegroundColor Yellow
+        $env:BROWSER = "none" # Evita que se abra el navegador automáticamente
+        
+        # Usar Start-Process con comillas correctamente escapadas
+        $frontendWindow = Start-Process -FilePath "powershell" -ArgumentList @(
+            "-NoExit",
+            "-Command",
+            "Set-Location '$rootPath\front'; npm start"
+        ) -PassThru -WindowStyle Normal
+
+        Set-Location $rootPath
+        
+        # Esperar a que el servidor esté listo
+        $maxAttempts = 30
+        $attempts = 0
+        $serverStarted = $false
+
+        Write-Host "Esperando a que el servidor frontend esté listo..." -ForegroundColor Yellow
+        while ($attempts -lt $maxAttempts -and -not $serverStarted) {
+            if (Test-Port 3000) {
+                $serverStarted = $true
+                Write-Host "Frontend iniciado correctamente en el puerto 3000" -ForegroundColor Green
+            } else {
+                Start-Sleep -Seconds 1
+                $attempts++
+                Write-Host "Esperando... Intento $attempts de $maxAttempts" -ForegroundColor Yellow
+            }
+        }
+
+        if (-not $serverStarted) {
+            Write-Host "Error: El servidor frontend no pudo iniciarse después de $maxAttempts intentos" -ForegroundColor Red
+            if ($frontendWindow) {
+                Stop-Process -Id $frontendWindow.Id -Force
+            }
+            if ($backendWindow) {
+                Stop-Process -Id $backendWindow.Id -Force
+            }
+            return
+        }
+    }
+    catch {
+        Write-Host "Error al iniciar el frontend: $_" -ForegroundColor Red
+        Set-Location $rootPath
+        if ($backendWindow) {
+            Stop-Process -Id $backendWindow.Id -Force
+        }
+        return
+    }
+
+    Write-Host "`nServidores iniciados correctamente!" -ForegroundColor Green
+    Write-Host "Backend corriendo en: http://localhost:5000" -ForegroundColor Cyan
+    Write-Host "Frontend corriendo en: http://localhost:3000" -ForegroundColor Cyan
+    Write-Host "`nPresiona Ctrl+C en las ventanas de los servidores para detenerlos." -ForegroundColor Yellow
+    Write-Host "Para acceder a la aplicación, abre http://localhost:3000 en tu navegador" -ForegroundColor Yellow
 }
 
 # Bucle principal del programa

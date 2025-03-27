@@ -7,7 +7,27 @@ function Test-VirtualEnv {
     return $false
 }
 
+# Función para verificar si un puerto está en uso
+function Test-Port {
+    param($port)
+    try {
+        $tcp = New-Object System.Net.Sockets.TcpClient
+        $tcp.Connect("localhost", $port)
+        $tcp.Close()
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
 Write-Host "🚀 Iniciando servidores..." -ForegroundColor Cyan
+
+# Matar procesos existentes
+Write-Host "🔄 Limpiando procesos anteriores..." -ForegroundColor Yellow
+Get-Process -Name "node" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process -Name "python" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
 
 # Verificar si el entorno virtual está activado
 if (-not (Test-VirtualEnv)) {
@@ -44,17 +64,65 @@ if (-not (Test-Path "back\.env")) {
     }
 }
 
+# Verificar node_modules
+if (-not (Test-Path "front\node_modules")) {
+    Write-Host "📦 Instalando dependencias del frontend..." -ForegroundColor Yellow
+    Push-Location front
+    npm install --legacy-peer-deps
+    if (-not $?) {
+        Write-Host "❌ Error al instalar dependencias del frontend" -ForegroundColor Red
+        Pop-Location
+        exit 1
+    }
+    Pop-Location
+}
+
 # Iniciar el backend en una nueva ventana
 Write-Host "🔧 Iniciando el backend..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; . .\.venv\Scripts\Activate.ps1; python back/server.py"
+$backendWindow = Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; . .\.venv\Scripts\Activate.ps1; python back/server.py" -PassThru
 
-# Esperar un momento para que el backend inicie
-Start-Sleep -Seconds 2
+# Esperar a que el backend esté listo
+Write-Host "⏳ Esperando a que el backend esté listo..." -ForegroundColor Yellow
+Start-Sleep -Seconds 5
 
-# Iniciar el frontend
+# Iniciar el frontend en una nueva ventana
 Write-Host "🎨 Iniciando el frontend..." -ForegroundColor Green
-Set-Location front
-npm start
+$env:BROWSER = "none" # Evitar que se abra el navegador automáticamente
+Push-Location front
 
-# Si el frontend se cierra, cerrar también el backend
-Get-Process -Name python | Where-Object {$_.MainWindowTitle -match "python back/server.py"} | Stop-Process 
+# Iniciar el frontend con npm en una nueva ventana
+$frontendWindow = Start-Process powershell -ArgumentList "-NoExit", "-Command", "npm start" -PassThru -WindowStyle Normal
+
+Pop-Location
+
+# Esperar a que los servidores estén listos
+$maxAttempts = 30
+$attempts = 0
+$allStarted = $false
+
+Write-Host "⏳ Esperando a que los servidores estén listos..." -ForegroundColor Yellow
+while ($attempts -lt $maxAttempts -and -not $allStarted) {
+    $backend = Test-Port 5000
+    $frontend = Test-Port 3000
+    
+    if ($backend -and $frontend) {
+        $allStarted = $true
+        Write-Host "✅ ¡Todos los servidores están listos!" -ForegroundColor Green
+        Write-Host "   Backend: http://localhost:5000" -ForegroundColor Cyan
+        Write-Host "   Frontend: http://localhost:3000" -ForegroundColor Cyan
+    }
+    else {
+        Start-Sleep -Seconds 1
+        $attempts++
+        Write-Host "⏳ Esperando... Intento $attempts de $maxAttempts" -ForegroundColor Yellow
+    }
+}
+
+if (-not $allStarted) {
+    Write-Host "❌ Error: No se pudieron iniciar todos los servidores" -ForegroundColor Red
+    if ($backendWindow) { Stop-Process -Id $backendWindow.Id -Force }
+    if ($frontendWindow) { Stop-Process -Id $frontendWindow.Id -Force }
+    exit 1
+}
+
+Write-Host "`n💡 Para detener los servidores, cierra las ventanas de PowerShell o presiona Ctrl+C en cada una." -ForegroundColor Yellow 
