@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   Title,
   Subtitle,
   ThemeProps
 } from './shared/CommonStyles';
+import { Typography, Button, Box } from '@mui/material';
+import { styled as muiStyled } from '@mui/material/styles';
+import { Theme } from '@mui/material/styles';
 
 export interface Product {
   id: number;
@@ -48,15 +51,32 @@ const MainContent = styled.div`
   min-height: 100vh;
   padding: 2rem;
   background: rgba(255, 255, 255, 0);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
   padding: 1rem;
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ProductCard = styled.div<{ isSelected: boolean }>`
@@ -97,47 +117,49 @@ const ProductPrice = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0.5rem 0;
-`;
-
-const QuantityControl = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin: 1rem 0;
+  gap: 0.25rem;
 `;
 
-const QuantityButton = styled.button`
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  background: #41E1E1;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+const BsPrice = styled.span`
+  font-size: 1rem;
+  color: #666;
+`;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(65, 225, 225, 0.2);
+const QuantityText = muiStyled(Typography)<{ theme?: Theme }>(({ theme }) => ({
+  fontSize: '1.2rem',
+  fontWeight: 'bold',
+  margin: '0 1rem',
+  minWidth: '30px',
+  textAlign: 'center',
+  color: theme?.palette.mode === 'dark' ? '#fff' : '#000',
+}));
+
+const QuantityButton = muiStyled(Button)<{ theme?: Theme }>(({ theme }) => ({
+  minWidth: '40px',
+  height: '40px',
+  padding: '0',
+  borderRadius: '8px',
+  backgroundColor: theme?.palette.mode === 'dark' ? '#03b5fc' : '#ff8c32',
+  color: '#fff',
+  '&:hover': {
+    backgroundColor: theme?.palette.mode === 'dark' ? '#0299d6' : '#ff7b1f',
+  },
+  '&:disabled': {
+    backgroundColor: theme?.palette.mode === 'dark' ? 'rgba(3, 181, 252, 0.3)' : 'rgba(255, 140, 50, 0.3)',
+    color: theme?.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
   }
+}));
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-`;
-
-const QuantityText = styled.span`
-  color: #4a4a4a;
-  font-size: 1.2rem;
-  min-width: 24px;
-  text-align: center;
-`;
+const QuantityControl = muiStyled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: '1rem',
+  gap: '0.5rem',
+});
 
 const SelectedBadge = styled.div`
   background: rgba(75, 181, 67, 0.1);
@@ -180,6 +202,15 @@ const combos: Combo[] = [
     description: 'Palomitas jumbo + 4 Refrescos grandes + 2 Hot Dogs + Tequeños',
     price: 24.99,
     image: '/images/combo3.jpg',
+    quantity: 0,
+    category: 'combo'
+  },
+  {
+    id: 4,
+    name: 'Combo Cleopatra & Marco Antonio',
+    description: 'Palomitas grandes en forma de corazón + 2 Refrescos medianos + Chocolate en forma de corazón + 2 Hot Dogs',
+    price: 18.99,
+    image: '/images/combo-romance.jpg',
     quantity: 0,
     category: 'combo'
   }
@@ -311,42 +342,69 @@ const popcorn: Product[] = [
 ];
 
 const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, showOnlyInBooking }) => {
-  const [selectedCombos, setSelectedCombos] = useState<Combo[]>(combos);
+  const [selectedCombos, setSelectedCombos] = useState<Combo[]>(combos.map(combo => ({ ...combo, quantity: 0 })));
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([
-    ...drinks,
-    ...snacks,
-    ...popcorn
+    ...drinks.map(drink => ({ ...drink, quantity: 0 })),
+    ...snacks.map(snack => ({ ...snack, quantity: 0 })),
+    ...popcorn.map(pop => ({ ...pop, quantity: 0 }))
   ]);
+  const [dolarRate, setDolarRate] = useState<number | null>(null);
 
-  const handleQuantityChange = (productId: number, increment: boolean) => {
-    const updatedProducts = selectedProducts.map(product => {
-      if (product.id === productId) {
-        const newQuantity = increment ? (product.quantity || 0) + 1 : Math.max(0, (product.quantity || 0) - 1);
-        return { ...product, quantity: newQuantity };
+  useEffect(() => {
+    const fetchDolarRate = async () => {
+      try {
+        const response = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar/today');
+        const data = await response.json();
+        // Usamos el promedio entre el precio de compra y venta
+        const rate = (parseFloat(data.monitors.enparalelovzla.price) + parseFloat(data.monitors.dolartoday.price)) / 2;
+        setDolarRate(rate);
+      } catch (error) {
+        console.error('Error fetching dolar rate:', error);
+        // Si hay error, usamos una tasa por defecto
+        setDolarRate(35.50);
       }
-      return product;
-    });
+    };
 
-    setSelectedProducts(updatedProducts);
+    fetchDolarRate();
+    // Actualizamos la tasa cada hora
+    const interval = setInterval(fetchDolarRate, 3600000);
+    return () => clearInterval(interval);
+  }, []);
 
-    // Actualizar combos si es necesario
-    const updatedCombos = selectedCombos.map(combo => {
-      if (combo.id === productId) {
-        const newQuantity = increment ? combo.quantity + 1 : Math.max(0, combo.quantity - 1);
-        return { ...combo, quantity: newQuantity };
-      }
-      return combo;
-    });
+  const handleQuantityChange = (productId: number, increment: boolean, isCombo: boolean = false) => {
+    if (isCombo) {
+      const updatedCombos = selectedCombos.map(combo => {
+        if (combo.id === productId) {
+          const newQuantity = increment ? combo.quantity + 1 : Math.max(0, combo.quantity - 1);
+          return { ...combo, quantity: newQuantity };
+        }
+        return combo;
+      });
+      setSelectedCombos(updatedCombos);
+      onCombosSelected?.(updatedCombos.filter(combo => combo.quantity > 0));
+    } else {
+      const updatedProducts = selectedProducts.map(product => {
+        if (product.id === productId) {
+          const newQuantity = increment ? (product.quantity || 0) + 1 : Math.max(0, (product.quantity || 0) - 1);
+          return { ...product, quantity: newQuantity };
+        }
+        return product;
+      });
+      setSelectedProducts(updatedProducts);
+    }
+  };
 
-    setSelectedCombos(updatedCombos);
-    onCombosSelected?.(updatedCombos.filter(combo => combo.quantity > 0));
+  const formatBsPrice = (usdPrice: number): string => {
+    if (!dolarRate) return '...';
+    const bsPrice = usdPrice * dolarRate;
+    return `Bs. ${bsPrice.toFixed(2)}`;
   };
 
   if (!showOnlyInBooking) {
     return null;
   }
 
-  const renderProductSection = (title: string, products: Product[]) => (
+  const renderProductSection = (title: string, products: Product[], isCombo: boolean = false) => (
     <>
       <SectionTitle currentTheme={mode}>{title}</SectionTitle>
       <Grid>
@@ -356,24 +414,27 @@ const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, sho
             <ProductName>{product.name}</ProductName>
             <ProductDescription>{product.description}</ProductDescription>
             {product.size && <ProductSize>Tamaño: {product.size}</ProductSize>}
-            <ProductPrice>${product.price.toFixed(2)}</ProductPrice>
+            <ProductPrice>
+              <span>${product.price.toFixed(2)}</span>
+              <BsPrice>{formatBsPrice(product.price)}</BsPrice>
+            </ProductPrice>
             <QuantityControl>
               <QuantityButton
-                onClick={() => handleQuantityChange(product.id, false)}
+                onClick={() => handleQuantityChange(product.id, false, isCombo)}
                 disabled={(product.quantity || 0) === 0}
               >
                 -
               </QuantityButton>
               <QuantityText>{product.quantity || 0}</QuantityText>
               <QuantityButton
-                onClick={() => handleQuantityChange(product.id, true)}
+                onClick={() => handleQuantityChange(product.id, true, isCombo)}
               >
                 +
               </QuantityButton>
             </QuantityControl>
             {(product.quantity || 0) > 0 && (
               <SelectedBadge>
-                <span>✓</span> Producto seleccionado
+                <span>✓</span> {(product.quantity || 0)} {(product.quantity || 0) === 1 ? 'seleccionado' : 'seleccionados'}
               </SelectedBadge>
             )}
           </ProductCard>
@@ -384,11 +445,10 @@ const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, sho
 
   return (
     <MainContent>
-
-      {renderProductSection('Combos Galácticos', combos)}
-      {renderProductSection('Palomitas Estelares', popcorn)}
-      {renderProductSection('Bebidas Cósmicas', drinks)}
-      {renderProductSection('Snacks Interestelares', snacks)}
+      {renderProductSection('Combos Galácticos', selectedCombos, true)}
+      {renderProductSection('Palomitas Estelares', selectedProducts.filter(p => p.category === 'popcorn'))}
+      {renderProductSection('Bebidas Cósmicas', selectedProducts.filter(p => p.category === 'drinks'))}
+      {renderProductSection('Snacks Interestelares', selectedProducts.filter(p => p.category === 'snacks'))}
     </MainContent>
   );
 };

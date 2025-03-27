@@ -84,17 +84,24 @@ const FeatureBox = styled(Box)<{ mode: 'dark' | 'light' }>(({ mode }) => ({
   }
 }));
 
-const MovieCard = styled(Card)<{ mode: 'dark' | 'light' }>(({ mode }) => ({
-  background: mode === 'dark'
-    ? 'rgba(26, 32, 44, 0.8)'
-    : 'rgba(255, 255, 255, 0.9)',
-  backdropFilter: 'blur(10px)',
-  borderRadius: 16,
+const MovieCard = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  borderRadius: '12px',
   overflow: 'hidden',
-  transition: 'transform 0.3s ease-in-out',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 16px rgba(0,0,0,0.4)'
+    : '0 8px 16px rgba(0,0,0,0.1)',
+  transition: 'all 0.3s ease-in-out',
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
   '&:hover': {
-    transform: 'translateY(-10px)',
-  }
+    transform: 'translateY(-8px)',
+    boxShadow: theme.palette.mode === 'dark' 
+      ? '0 12px 24px rgba(3, 181, 252, 0.2)'
+      : '0 12px 24px rgba(255, 140, 50, 0.2)',
+  },
 }));
 
 const features = [
@@ -261,7 +268,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ mode, onStartJourney, onModeC
         Comenzar Viaje
       </StartButton>
 
-      <Box sx={{ py: 8, position: 'relative', zIndex: 1 }}>
+      <Box sx={{ py: 8, position: 'relative', zIndex: 1, maxWidth: '1400px', margin: '0 auto', width: '100%', px: 3 }}>
         <Typography
           variant="h2"
           align="center"
@@ -278,10 +285,10 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ mode, onStartJourney, onModeC
           Cartelera Actual
         </Typography>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={3}>
           {movies.map((movie, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <MovieCard mode={mode}>
+              <MovieCard>
                 <CardMedia
                   component="img"
                   height="400"

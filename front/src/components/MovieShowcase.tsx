@@ -136,7 +136,7 @@ const MovieInfo = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between',
 }));
 
-const BuyButton = styled(Button)(({ theme }) => ({
+const ViewDetailsButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(2),
   backgroundColor: theme.palette.mode === 'dark' ? '#03b5fc' : '#ff8c32',
   color: '#fff',
@@ -155,9 +155,8 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
   const topMovies = movies.filter(movie => movie.isTop);
   const regularMovies = movies.filter(movie => !movie.isTop);
 
-  const handleBuyClick = (movieId: number) => {
-    // Implementar lógica de compra
-    console.log(`Comprando película con ID: ${movieId}`);
+  const handleViewDetails = (movieId: string) => {
+    navigate(`/movie/${movieId}`);
   };
 
   const MovieGrid = ({ movies, columns }: { movies: Movie[], columns: number }) => (
@@ -175,6 +174,8 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
                   textShadow: '0 2px 4px rgba(0,0,0,0.5)',
                   fontSize: '1rem',
                   maxWidth: '80%',
+                  position: 'relative',
+                  zIndex: 1,
                 }}
               >
                 {movie.title}
@@ -194,13 +195,13 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
               >
                 {movie.title}
               </Typography>
-              <BuyButton
+              <ViewDetailsButton
                 variant="contained"
                 fullWidth
-                onClick={() => handleBuyClick(parseInt(movie.id))}
+                onClick={() => handleViewDetails(movie.id)}
               >
-                COMPRAR
-              </BuyButton>
+                VER DETALLES
+              </ViewDetailsButton>
             </MovieInfo>
           </MovieCard>
         </Grid>

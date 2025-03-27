@@ -11,46 +11,22 @@ import {
   styled,
   keyframes,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import MovieIcon from '@mui/icons-material/Movie';
-import PersonIcon from '@mui/icons-material/Person';
-import LocalActivityIcon from '@mui/icons-material/LocalActivity';
-import InfoIcon from '@mui/icons-material/Info';
-import StarIcon from '@mui/icons-material/Star';
-import { Brightness4, Brightness7 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import {
+  Brightness4,
+  Brightness7,
+  Menu as MenuIcon,
+  Movie,
+  Event,
+  Info,
+  Person,
+  Star
+} from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface NavbarProps {
   mode: 'dark' | 'light';
   onModeChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
-
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  background: '#1a1a1a',
-  boxShadow: 'none',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-  height: '64px',
-  zIndex: 1100,
-}));
-
-const StyledToolbar = styled(Toolbar)({
-  minHeight: '64px',
-  padding: '0 24px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: '16px',
-});
-
-const NavButton = styled(Button)({
-  color: '#ffffff',
-  textTransform: 'uppercase',
-  fontWeight: 'bold',
-  padding: '8px 16px',
-  '&:hover': {
-    background: 'rgba(255, 255, 255, 0.1)',
-  },
-});
 
 const shineAnimation = keyframes`
   0% {
@@ -61,48 +37,85 @@ const shineAnimation = keyframes`
   }
 `;
 
-const BHMemberButton = styled(Button)({
-  color: '#000000',
-  background: 'linear-gradient(90deg, #FFD700, #FDB931, #FFD700, #FDB931)',
-  backgroundSize: '400% auto',
-  textTransform: 'uppercase',
-  fontWeight: 'bold',
-  padding: '8px 24px',
-  borderRadius: '50px',
-  marginLeft: '8px',
-  transition: 'all 0.3s ease',
-  animation: `${shineAnimation} 8s linear infinite`,
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 5px 15px rgba(253, 185, 49, 0.4)',
-    animationDuration: '3s',
-  },
-});
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  background: theme.palette.mode === 'dark'
+    ? 'linear-gradient(to right, #0a192f, #112240)'
+    : '#FFFFF0',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 4px 20px rgba(0,0,0,0.5)'
+    : '0 4px 20px rgba(0,0,0,0.1)',
+}));
 
 const Logo = styled('img')({
-  height: '32px',
+  height: '40px',
   cursor: 'pointer',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
 });
 
 const ThemeToggle = styled(IconButton)(({ theme }) => ({
-  position: 'fixed',
-  right: '24px',
-  top: '80px',
-  color: '#fff',
-  background: 'rgba(26, 32, 44, 0.8)',
-  backdropFilter: 'blur(10px)',
-  boxShadow: '0 3px 15px rgba(0, 0, 0, 0.3)',
+  color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+  marginLeft: 'auto',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    background: 'rgba(3, 181, 252, 0.1)',
-    transform: 'scale(1.1)',
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(3, 181, 252, 0.2)'
+      : 'rgba(255, 140, 50, 0.2)',
+    transform: 'rotate(180deg)',
+  },
+}));
+
+const LogoContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  justifyContent: 'space-between',
+  padding: `${theme.spacing(2)} ${theme.spacing(2)}`,
+}));
+
+const NavButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+  margin: theme.spacing(1),
+  textTransform: 'uppercase',
+  fontWeight: 'bold',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.1)'
+      : 'rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-2px)',
   },
   transition: 'all 0.3s ease',
-  zIndex: 1000,
+}));
+
+const BHMemberButton = styled(Button)(({ theme }) => ({
+  color: '#000',
+  backgroundColor: '#FFD700',
+  margin: theme.spacing(1),
+  padding: '6px 16px',
+  textTransform: 'uppercase',
+  fontWeight: 'bold',
+  borderRadius: '20px',
+  '&:hover': {
+    backgroundColor: '#FFC800',
+    transform: 'translateY(-2px)',
+  },
+  transition: 'all 0.3s ease',
 }));
 
 const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -125,89 +138,111 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
     <>
       <StyledAppBar position="fixed">
         <StyledToolbar>
+          <LogoContainer onClick={handleLogoClick}>
+            <Logo
+              src="/planeta-cinema-logo.png"
+              alt="Planeta Cinema"
+              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                e.currentTarget.src = '/placeholder-logo.png';
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                color: mode === 'dark' ? '#fff' : '#000',
+                display: { xs: 'none', sm: 'block' },
+                fontWeight: 'bold',
+              }}
+            >
+              Planeta Cinema
+            </Typography>
+          </LogoContainer>
+
           <Box sx={{ 
             display: { xs: 'none', md: 'flex' }, 
             alignItems: 'center',
-            gap: 2
+            gap: 1
           }}>
-            <NavButton
-              startIcon={<MovieIcon />}
+            <NavButton 
               onClick={() => handleNavigation('/cartelera')}
+              startIcon={<Movie />}
             >
               Cartelera
             </NavButton>
-            <NavButton
-              startIcon={<LocalActivityIcon />}
+            <NavButton 
               onClick={() => handleNavigation('/eventos')}
+              startIcon={<Event />}
             >
               Eventos
             </NavButton>
-            <NavButton
-              startIcon={<InfoIcon />}
-              onClick={() => handleNavigation('/sobre-nosotros')}
+            <NavButton 
+              onClick={() => handleNavigation('/contact')}
+              startIcon={<Info />}
             >
-              Sobre Nosotros
+              Contáctanos
             </NavButton>
-            <NavButton
-              startIcon={<PersonIcon />}
+            <NavButton 
               onClick={() => handleNavigation('/login')}
+              startIcon={<Person />}
             >
               Iniciar Sesión
             </NavButton>
-            <BHMemberButton
-              startIcon={<StarIcon />}
+            <BHMemberButton 
               onClick={() => handleNavigation('/bh-member')}
+              startIcon={<Star />}
             >
               BH Member
             </BHMemberButton>
+            <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
+              {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+            </ThemeToggle>
           </Box>
 
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              edge="end"
-              color="inherit"
               aria-label="menu"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
               onClick={handleMenu}
+              color="inherit"
             >
               <MenuIcon />
             </IconButton>
             <Menu
+              id="menu-appbar"
               anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'right',
               }}
+              keepMounted
               transformOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
               }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
             >
               <MenuItem onClick={() => handleNavigation('/cartelera')}>
-                <MovieIcon sx={{ mr: 1 }} /> Cartelera
+                <Movie sx={{ mr: 1 }} /> Cartelera
               </MenuItem>
               <MenuItem onClick={() => handleNavigation('/eventos')}>
-                <LocalActivityIcon sx={{ mr: 1 }} /> Eventos
+                <Event sx={{ mr: 1 }} /> Eventos
               </MenuItem>
-              <MenuItem onClick={() => handleNavigation('/sobre-nosotros')}>
-                <InfoIcon sx={{ mr: 1 }} /> Sobre Nosotros
-              </MenuItem>
-              <MenuItem onClick={() => handleNavigation('/bh-member')}>
-                <StarIcon sx={{ mr: 1 }} /> BH Member
+              <MenuItem onClick={() => handleNavigation('/contact')}>
+                <Info sx={{ mr: 1 }} /> Contáctanos
               </MenuItem>
               <MenuItem onClick={() => handleNavigation('/login')}>
-                <PersonIcon sx={{ mr: 1 }} /> Iniciar Sesión
+                <Person sx={{ mr: 1 }} /> Iniciar Sesión
+              </MenuItem>
+              <MenuItem onClick={() => handleNavigation('/bh-member')}>
+                <Star sx={{ mr: 1 }} /> BH Member
               </MenuItem>
             </Menu>
           </Box>
         </StyledToolbar>
       </StyledAppBar>
-
-      <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
-        {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-      </ThemeToggle>
     </>
   );
 };

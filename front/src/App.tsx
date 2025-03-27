@@ -13,6 +13,9 @@ import { SnackBar } from './components/SnackBar';
 import NotFound from './components/NotFound';
 import BHMember from './components/BHMember';
 import Payment from './components/Payment';
+import MovieDetails from './components/MovieDetails';
+import ContactForm from './components/ContactForm';
+import Events from './components/Events';
 
 const AppContent = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -80,6 +83,18 @@ const AppContent = () => {
           <Route
             path="/payment"
             element={<Payment mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+          />
+          <Route
+            path="/movie/:id"
+            element={<MovieDetails mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+          />
+          <Route
+            path="/contact"
+            element={<ContactForm mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+          />
+          <Route
+            path="/eventos"
+            element={<Events mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
           />
           <Route
             path="*"
