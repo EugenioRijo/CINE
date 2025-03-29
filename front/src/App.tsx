@@ -17,6 +17,7 @@ import Payment from './components/Payment';
 import MovieDetails from './components/MovieDetails';
 import ContactForm from './components/ContactForm';
 import Events from './components/Events';
+import { AuthProvider } from './components/AuthContext';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -24,7 +25,7 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth' // Para un scroll suave
+      behavior: 'smooth'
     });
   }, [pathname]);
 
@@ -65,7 +66,7 @@ const AppContent = () => {
     },
   });
 
-  const handleModeChange = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleModeChange = () => {
     setIsDarkMode((prevMode) => !prevMode);
   };
 
@@ -81,7 +82,13 @@ const AppContent = () => {
         <Routes>
           <Route
             path="/"
-            element={<WelcomePage mode={isDarkMode ? 'dark' : 'light'} onStartJourney={handleStartJourney} onModeChange={handleModeChange} />}
+            element={
+              <WelcomePage 
+                mode={isDarkMode ? 'dark' : 'light'} 
+                onStartJourney={handleStartJourney} 
+                onModeChange={handleModeChange} 
+              />
+            }
           />
           <Route
             path="/cartelera"
@@ -116,8 +123,8 @@ const AppContent = () => {
             element={<NotFound mode={isDarkMode ? 'dark' : 'light'} />}
           />
         </Routes>
+        <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
       </Box>
-      <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
     </ThemeProvider>
   );
 };
@@ -125,7 +132,9 @@ const AppContent = () => {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
