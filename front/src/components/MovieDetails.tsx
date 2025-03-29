@@ -587,7 +587,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
                   <iframe
                     width="100%"
                     height="100%"
-                    src={movie.trailerUrl}
+                    // src={movie.trailerUrl}
+                    src={movie.trailerUrl.replace('youtu.be/', 'www.youtube.com/embed/').split('?')[0] + '?autoplay=1&rel=0&modestbranding=1'}
                     title={`${movie.title} Trailer`}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
