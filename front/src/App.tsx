@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import {
   BrowserRouter,
   Routes,
   Route,
-  useNavigate
+  useNavigate,
+  useLocation
 } from 'react-router-dom';
 import WelcomePage from './components/WelcomePage';
 import MovieShowcase from './components/MovieShowcase';
@@ -16,6 +17,19 @@ import Payment from './components/Payment';
 import MovieDetails from './components/MovieDetails';
 import ContactForm from './components/ContactForm';
 import Events from './components/Events';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth' // Para un scroll suave
+    });
+  }, [pathname]);
+
+  return null;
+}
 
 const AppContent = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -63,6 +77,7 @@ const AppContent = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <ScrollToTop />
         <Routes>
           <Route
             path="/"
@@ -113,4 +128,4 @@ export default function App() {
       <AppContent />
     </BrowserRouter>
   );
-} 
+}

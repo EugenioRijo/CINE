@@ -169,7 +169,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://www.youtube.com/embed/qEuqmrYLRkI',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
   },
   '14': {
     title: 'CAPITAN AMERICA UN NUEVO MUNDO',
@@ -181,7 +181,7 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['1:00 PM', '4:00 PM', '7:00 PM', '10:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://www.youtube.com/embed/AjLTXrL6O44',
+    trailerUrl: 'https://youtu.be/i0zaDSsk08w?si=BcYvxphzKM4W6iTT',
   },
   '3': {
     title: 'ATTACK ON TITAN EL ATAQUE FINAL',
@@ -193,7 +193,7 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['3:00 PM', '6:00 PM', '9:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://www.youtube.com/embed/r7MosyoAUhQ',
+    trailerUrl: 'https://youtu.be/3xNH23QkNpk?si=25yhurAbRYs3wGqA',
   },
   '5': {
     title: 'CODIGO NEGRO',
@@ -205,6 +205,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/1QdSlGXn72M?si=9FEkCNtwhMUa4r6d'
   },
   '11': {
     title: 'FLOW',
@@ -216,6 +217,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:30 PM', '6:00 PM', '8:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/izIuFUnZkjA?si=FKejhIgvD1Ip3Nj2'
   },
   '1': {
     title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR',
@@ -227,6 +229,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/RZHkQe5ThQQ?si=YTUVoqojsnbzaRbX'
   },
   '2': {
     title: 'UNA PELICULA DE MINECRAFT',
@@ -238,6 +241,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['1:30 PM', '4:00 PM', '6:30 PM', '9:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/yxrjSE8XddA?si=PiE5CpMR4beGvSLs'
   },
   '6': {
     title: 'CONJURO DE LA BRUJA',
