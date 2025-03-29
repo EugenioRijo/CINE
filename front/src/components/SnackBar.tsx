@@ -207,7 +207,7 @@ const combos: Combo[] = [
   },
   {
     id: 4,
-    name: 'Combo Cleopatra & Marco Antonio',
+    name: 'Combo Constelación Romántica',
     description: 'Palomitas grandes en forma de corazón + 2 Refrescos medianos + Chocolate en forma de corazón + 2 Hot Dogs',
     price: 18.99,
     image: '/img/cleo.jpeg',
