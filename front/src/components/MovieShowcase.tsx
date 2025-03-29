@@ -30,23 +30,22 @@ const movies: Movie[] = [
   { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true },
   { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl:'/img/capitan.jpg', isTop: true },
   { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl:'/img/titan.jpg', isTop: true },
-  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/', isTop: true },
-  { id: '11', title: 'FLOW', imageUrl:'/img/', isTop: true },
+  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true },
+  { id: '11', title: 'FLOW', imageUrl:'/img/flow.jpg', isTop: true },
   // Cartelera Regular
-  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/' },
-  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/' },
-  { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl:'/img/' },
-  { id: '7', title: 'FRIO', imageUrl:'/img/' },
-  { id: '8', title: 'EL GUARDIAN DE LA MAGIA', imageUrl:'/img/' },
-  { id: '9', title: 'NOVOCAINE', imageUrl:'/img/' },
-  { id: '10', title: 'MICKEY 17', imageUrl:'/img/' },
-  { id: '12', title: 'EL MONO', imageUrl:'/img/' },
-  { id: '13', title: 'OPERACION PANDA', imageUrl:'/img/' },
-  { id: '15', title: 'AUN ESTOY AQUI', imageUrl:'/img/' },
-  { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/' },
-  { id: '17', title: 'ANORA', imageUrl:'/img/' },
-  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/' },
-  { id: '19', title: 'MUFASA EL REY LEON', imageUrl:'/img/' }
+  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg' },
+  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg' },
+  { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl:'/img/bruja.jpg' },
+  { id: '8', title: 'ARGYLLE', imageUrl:'/img/argylle.jpg' },
+  { id: '9', title: 'NOVOCAINE', imageUrl:'/img/novocaide.jpg' },
+  { id: '10', title: 'MICKEY 17', imageUrl:'/img/my17.jpg' },
+  { id: '12', title: 'EL MONO', imageUrl:'/img/elmono.jpg' },
+  { id: '13', title: 'OPERACION PANDA', imageUrl:'/img/oppanda.jpg' },
+  { id: '15', title: 'AUN ESTOY AQUI', imageUrl:'/img/aun.jpg' },
+  { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/brutalista.jpg' },
+  { id: '17', title: 'ANORA', imageUrl:'/img/anora.jpg' },
+  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/soc3.jpg' },
+
 ];
 
 const ShowcaseContainer = styled(Box)(({ theme }) => ({
