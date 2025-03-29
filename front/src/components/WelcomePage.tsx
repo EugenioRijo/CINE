@@ -139,7 +139,7 @@ const movies = [
   },
   {
     title: 'Kung Fu Panda 4',
-    image: '/img/panda.jpg',
+    image: '/img/kungfupanda4.jpg',
     year: '2024',
     duration: '1h 34min',
     genre: 'Animación',
