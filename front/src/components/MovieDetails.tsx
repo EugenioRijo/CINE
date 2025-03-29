@@ -253,9 +253,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['4:00 PM', '6:30 PM', '9:00 PM', '11:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/4wIoIzcVFYw?si=FXvdJk_6_XN2ESAO'
+
   },
   '7': {
-    title: 'FRIO',
+    title: 'ARGYLLE',
     imageUrl: '/img/argylle.jpg',
     description: 'Un grupo de supervivientes debe enfrentarse a una tormenta mortal y temperaturas extremas en esta intensa película de supervivencia.',
     duration: '2h 05min',
@@ -264,6 +266,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:00 PM', '5:30 PM', '8:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/vTA_MQzWz3w?si=jOCGznqynaXhL1Sx'
   },
   '8': {
     title: 'ARGYLLE',
@@ -275,6 +278,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/vTA_MQzWz3w?si=jOCGznqynaXhL1Sx'
   },
   '9': {
     title: 'NOVOCAINE',
@@ -286,6 +290,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/pMfULWLqifI?si=PRtr1rcuDrYUib2l'
   },
   '10': {
     title: 'MICKEY 17',
@@ -297,6 +302,7 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/hjS-RGoif1Q?si=-MdPs--y9z68X5FZ'
   },
   '12': {
     title: 'EL MONO',
@@ -308,6 +314,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:00 PM', '5:30 PM', '8:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/hOzVJSGSGXA?si=WRm6XID5-kjKCAC2'
   },
   '13': {
     title: 'OPERACION PANDA',
@@ -319,6 +326,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['1:00 PM', '3:30 PM', '6:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/QDkotU-lpeM?si=Jv4dyXklnsyIaZ_V'
   },
   '15': {
     title: 'AUN ESTOY AQUI',
@@ -330,6 +338,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/LDwVOHbJByk?si=wMOwb08BrGaos_9M'
   },
   '16': {
     title: 'EL BRUTALISTA',
@@ -341,6 +350,7 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:30 PM', '6:00 PM', '8:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/vna5bN96xJg?si=Bx0CpjNR8TmN4qra'
   },
   '17': {
     title: 'ANORA',
@@ -352,6 +362,7 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/M25Dqnr6JYE?si=APuNdLojvMVhDuLf'
   },
   '18': {
     title: 'SONIC 3 LA PELICULA',
@@ -363,6 +374,7 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['1:30 PM', '4:00 PM', '6:30 PM', '9:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/ySkQCd7UOhk?si=k7Ir8YEbx8fhYoQE'
   },
   '19': {
     title: 'MUFASA EL REY LEON',
