@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import {
   Box,
   Container,
@@ -260,7 +260,14 @@ const mockMovies: Movie[] = [
 ];
 
 const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => {
+  // Estados existentes
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  
+  // 🚨 Añade estos nuevos estados y funciones aquí 🚨
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado de autenticación
+  const handleLogout = () => setIsAuthenticated(false); // Función de logout
+
+  // Resto del código existente...
   const topMovies = mockMovies.filter(movie => movie.isTop);
   const regularMovies = mockMovies.filter(movie => !movie.isTop);
 
@@ -275,7 +282,11 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
 
   return (
     <StyledContainer>
-      <Navbar />
+      <Navbar 
+        isAuthenticated={isAuthenticated} 
+        onLogout={handleLogout}
+        mode={mode}
+      />
       <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
         {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
       </ThemeToggle>

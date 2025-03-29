@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -16,6 +16,17 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, Email, Lock, LightMode, DarkMode, Brightness4, Brightness7 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+
+interface AuthResponse {
+  access_token: string;
+  cliente: {
+    id: number;
+    nombre: string;
+    email: string;
+    es_miembro: boolean;
+  };
+  error?: string;
+}
 
 interface StyledCardProps extends Omit<CardProps, 'mode'> {
   mode: 'dark' | 'light';
@@ -100,6 +111,11 @@ const SignInCard: React.FC<SignInCardProps> = ({ mode, onModeChange }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) navigate('/'); // Redirige a la ruta raíz donde está WelcomePage
+  }, [navigate]);
+
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
     
@@ -131,54 +147,63 @@ const SignInCard: React.FC<SignInCardProps> = ({ mode, onModeChange }) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
+    setIsSubmitting(true);
+  
     try {
       if (isRegistering) {
-        // Validaciones
+        // === REGISTRO ===
         if (!formData.email || !formData.password || !formData.nombre) {
           setError('Todos los campos son requeridos');
-          return;
+          return; // Detiene la ejecución
         }
-
-        const response = await fetch('http://localhost:5000/api/clientes/', {
+  
+        const response = await fetch('http://localhost:5000/api/auth/registro', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
+            nombre: formData.nombre,
             email: formData.email,
-            password: formData.password,
-            nombre: formData.nombre
-          })
+            password: formData.password
+          }),
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Error al registrar usuario');
-        }
-
-        setSuccess('Usuario registrado exitosamente');
-        setIsRegistering(false);
-        // Limpiar el formulario después del registro exitoso
-        setFormData({
-          email: '',
-          password: '',
-          nombre: ''
-        });
+  
+        const data: AuthResponse = await response.json();
+        
+        if (!response.ok) throw new Error(data.error || 'Error en el registro');
+        
+        // Redirige SOLO si es exitoso
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('cliente', JSON.stringify(data.cliente));
+        navigate('/');
+  
       } else {
-        // Aquí iría la lógica de inicio de sesión
-        if (!validateForm()) {
-          return;
-        }
-        setError('Funcionalidad de inicio de sesión pendiente');
+        // === LOGIN ===
+        if (!validateForm()) return; // Valida campos antes de enviar
+  
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, password }),
+        });
+  
+        const data: AuthResponse = await response.json();
+        
+        if (!response.ok) throw new Error(data.error || 'Credenciales inválidas');
+        
+        // Redirige SOLO si es exitoso
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem('token', data.access_token);
+        localStorage.setItem('cliente', JSON.stringify(data.cliente));
+        navigate('/');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error en la operación');
+      navigate('/login'); // Redirige de vuelta al login si hay error
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
+  
   return (
     <StyledCard mode={mode}>
       <CardContent sx={{ p: 4 }}>

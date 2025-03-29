@@ -100,24 +100,24 @@ const SignInCard: React.FC<SignInCardProps> = ({ mode, onModeChange }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
-    
-    if (!email) {
-      newErrors.email = 'El correo electrónico es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Por favor, ingresa un correo electrónico válido';
-    }
-    
-    if (!password) {
-      newErrors.password = 'La contraseña es requerida';
-    } else if (password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+ const validateForm = () => {
+  const newErrors: { email?: string; password?: string } = {};
+  
+  if (!email) {
+    newErrors.email = 'El correo electrónico es requerido';
+  } else if (!/\S+@\S+\.\S+/.test(email)) {
+    newErrors.email = 'Por favor, ingresa un correo electrónico válido';
+  }
+  
+  if (!password) {
+    newErrors.password = 'La contraseña es requerida';
+  } else if (password.length < 8) { // CAMBIA 6 POR 8
+    newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+  }
+  
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

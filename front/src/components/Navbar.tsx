@@ -15,7 +15,9 @@ import MovieIcon from '@mui/icons-material/Movie';
 import PersonIcon from '@mui/icons-material/Person';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 import InfoIcon from '@mui/icons-material/Info';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
+
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   background: theme.palette.mode === 'dark'
@@ -56,7 +58,12 @@ const Logo = styled('img')({
   marginRight: '16px',
 });
 
-const Navbar = () => {
+interface NavbarProps {
+  isAuthenticated: boolean;
+  onLogout: () => void;
+}
+
+const Navbar = ({ isAuthenticated, onLogout }: NavbarProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
@@ -71,6 +78,12 @@ const Navbar = () => {
   const handleNavigation = (path: string) => {
     navigate(path);
     handleClose();
+  };
+
+  const handleLogout = () => {
+    onLogout();
+    handleClose();
+    navigate('/');
   };
 
   return (
@@ -109,12 +122,22 @@ const Navbar = () => {
           >
             Sobre Nosotros
           </NavButton>
-          <NavButton
-            startIcon={<PersonIcon />}
-            onClick={() => handleNavigation('/login')}
-          >
-            Iniciar Sesión
-          </NavButton>
+          
+          {isAuthenticated ? (
+            <NavButton
+              startIcon={<ExitToAppIcon />}
+              onClick={handleLogout}
+            >
+              Cerrar Sesión
+            </NavButton>
+          ) : (
+            <NavButton
+              startIcon={<PersonIcon />}
+              onClick={() => handleNavigation('/login')}
+            >
+              Iniciar Sesión
+            </NavButton>
+          )}
         </Box>
 
         <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
@@ -141,9 +164,16 @@ const Navbar = () => {
             <MenuItem onClick={() => handleNavigation('/sobre-nosotros')}>
               <InfoIcon sx={{ mr: 1 }} /> Sobre Nosotros
             </MenuItem>
-            <MenuItem onClick={() => handleNavigation('/login')}>
-              <PersonIcon sx={{ mr: 1 }} /> Iniciar Sesión
-            </MenuItem>
+            
+            {isAuthenticated ? (
+              <MenuItem onClick={handleLogout}>
+                <ExitToAppIcon sx={{ mr: 1 }} /> Cerrar Sesión
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={() => handleNavigation('/login')}>
+                <PersonIcon sx={{ mr: 1 }} /> Iniciar Sesión
+              </MenuItem>
+            )}
           </Menu>
         </Box>
       </StyledToolbar>
@@ -151,4 +181,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Añadir imports
 import {
   Box,
   Container,
@@ -263,9 +263,32 @@ const WelcomePage: React.FC<WelcomePageProps> = ({
   onStartJourney,
   onModeChange,
 }) => {
+  // Estados y hooks en el nivel superior del componente
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  // Efecto para verificar autenticación
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  // Función de logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('cliente');
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
   return (
     <StyledContainer mode={mode}>
-      <Navbar />
+      <Navbar 
+        isAuthenticated={isAuthenticated} 
+        onLogout={handleLogout}
+        mode={mode}
+      />
       <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
         {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
       </ThemeToggle>

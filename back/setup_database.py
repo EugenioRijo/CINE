@@ -34,16 +34,16 @@ def create_database():
             # Crear todas las tablas
             create_tables_queries = [
                 """
-                CREATE TABLE clientes (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    nombre VARCHAR(100) NOT NULL,
-                    email VARCHAR(120) UNIQUE,
-                    password VARCHAR(20) NOT NULL,  
-                    telefono VARCHAR(20),
-                    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    es_miembro TINYINT(1) DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            CREATE TABLE clientes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                email VARCHAR(120) UNIQUE NOT NULL,  -- ✅ NOT NULL añadido
+                password VARCHAR(200) NOT NULL,      -- ✅ Longitud corregida
+                telefono VARCHAR(20),
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- ✅ Tipo cambiado
+                es_miembro TINYINT(1) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;  -- ✅ Collation
                 """,
                 
                 """
