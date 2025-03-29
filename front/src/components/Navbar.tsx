@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import {
   AppBar,
   Toolbar,
@@ -116,6 +116,32 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Nuevo estado
+
+  // Verificar autenticación al cargar y en cambios de almacenamiento
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    };
+    
+    checkAuth();
+    
+    // Escuchar eventos de almacenamiento para sincronizar entre pestañas
+    const handleStorageChange = () => checkAuth();
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('cliente');
+    sessionStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/');
+  };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -181,12 +207,24 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
             >
               Contáctanos
             </NavButton>
-            <NavButton 
-              onClick={() => handleNavigation('/login')}
-              startIcon={<Person />}
-            >
-              Iniciar Sesión
-            </NavButton>
+            {isLoggedIn ? (
+              <>
+                <NavButton 
+                  onClick={handleLogout}
+                  startIcon={<Person />}
+                >
+                  Cerrar Sesión
+                </NavButton>
+              </>
+            ) : (
+              <NavButton 
+                onClick={() => handleNavigation('/login')}
+                startIcon={<Person />}
+              >
+                Iniciar Sesión
+              </NavButton>
+            )}
+
             <BHMemberButton 
               onClick={() => handleNavigation('/bh-member')}
               startIcon={<Star />}
@@ -239,6 +277,17 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
               <MenuItem onClick={() => handleNavigation('/bh-member')}>
                 <Star sx={{ mr: 1 }} /> BH Member
               </MenuItem>
+
+              {isLoggedIn ? (
+                <MenuItem onClick={handleLogout}>
+                  <Person sx={{ mr: 1 }} /> Cerrar Sesión
+                </MenuItem>
+              ) : (
+                <MenuItem onClick={() => handleNavigation('/login')}>
+                  <Person sx={{ mr: 1 }} /> Iniciar Sesión
+                </MenuItem>
+              )}
+
             </Menu>
           </Box>
         </StyledToolbar>
