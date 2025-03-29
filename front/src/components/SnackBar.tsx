@@ -93,8 +93,8 @@ const ProductCard = styled.div<{ isSelected: boolean }>`
 `;
 
 const ProductImage = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 200px;
+  height: 200px;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -107,13 +107,13 @@ const ProductName = styled.h3`
 `;
 
 const ProductDescription = styled.p`
-  color: #666;
+  color: #000;
   margin: 0.5rem 0;
   font-size: 0.9rem;
 `;
 
 const ProductPrice = styled.div`
-  color: #41E1E1;
+  color:rgb(16, 129, 129);
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0.5rem 0;
@@ -125,7 +125,7 @@ const ProductPrice = styled.div`
 
 const BsPrice = styled.span`
   font-size: 1rem;
-  color: #666;
+  color: #555;
 `;
 
 const QuantityText = muiStyled(Typography)<{ theme?: Theme }>(({ theme }) => ({
@@ -134,7 +134,7 @@ const QuantityText = muiStyled(Typography)<{ theme?: Theme }>(({ theme }) => ({
   margin: '0 1rem',
   minWidth: '30px',
   textAlign: 'center',
-  color: theme?.palette.mode === 'dark' ? '#fff' : '#000',
+  color: '#000',
 }));
 
 const QuantityButton = muiStyled(Button)<{ theme?: Theme }>(({ theme }) => ({
@@ -461,7 +461,7 @@ const SectionTitle = styled.h2<ThemeProps>`
 `;
 
 const ProductSize = styled.div`
-  color: #666;
+  color: #555;
   font-size: 0.9rem;
   margin: 0.25rem 0;
 `;
