@@ -46,6 +46,7 @@ const MovieImage = styled(Box)(({ theme }) => ({
     ? '0 8px 32px rgba(0,0,0,0.5)'
     : '0 8px 32px rgba(0,0,0,0.1)',
   position: 'relative',
+  backgroundRepeat: 'no-repeat',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -536,7 +537,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
             <MovieImage
               sx={{
                 backgroundImage: `url(${movie.imageUrl})`,
-                backgroundSize: 'cover',
+                backgroundSize: 'contain',
                 backgroundPosition: 'center',
                 height: '400px',
               }}

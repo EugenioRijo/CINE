@@ -199,7 +199,7 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
                   zIndex: 1,
                 }}
               >
-                {movie.title}
+                
               </Typography>
             </MoviePlaceholder>
             <MovieInfo>
