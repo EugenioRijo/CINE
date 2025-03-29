@@ -203,7 +203,7 @@ const SignInCard: React.FC<SignInCardProps> = ({ mode, onModeChange }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <StyledCard mode={mode}>
       <CardContent sx={{ p: 4 }}>

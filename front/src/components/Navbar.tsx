@@ -9,63 +9,113 @@ import {
   MenuItem,
   Typography,
   styled,
+  keyframes,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import MovieIcon from '@mui/icons-material/Movie';
-import PersonIcon from '@mui/icons-material/Person';
-import LocalActivityIcon from '@mui/icons-material/LocalActivity';
-import InfoIcon from '@mui/icons-material/Info';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { useNavigate } from 'react-router-dom';
+import {
+  Brightness4,
+  Brightness7,
+  Menu as MenuIcon,
+  Movie,
+  Event,
+  Info,
+  Person,
+  Star
+} from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
+interface NavbarProps {
+  mode: 'dark' | 'light';
+  onModeChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+const shineAnimation = keyframes`
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+`;
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   background: theme.palette.mode === 'dark'
-    ? 'rgba(26, 32, 44, 0.8)'
-    : 'rgba(255, 255, 255, 0.8)',
-  backdropFilter: 'blur(10px)',
-  boxShadow: 'none',
-  borderBottom: `1px solid ${
-    theme.palette.mode === 'dark'
-      ? 'rgba(3, 181, 252, 0.2)'
-      : 'rgba(255, 140, 50, 0.2)'
-  }`,
-  height: '64px',
-  zIndex: 1100,
-}));
-
-const StyledToolbar = styled(Toolbar)({
-  minHeight: '64px',
-  padding: '0 24px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-});
-
-const NavButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.mode === 'dark' ? '#ffffff' : '#333333',
-  marginLeft: theme.spacing(1),
-  marginRight: theme.spacing(1),
-  '&:hover': {
-    background: theme.palette.mode === 'dark'
-      ? 'rgba(3, 181, 252, 0.1)'
-      : 'rgba(255, 140, 50, 0.1)',
-  },
+    ? 'linear-gradient(to right, #0a192f, #112240)'
+    : '#FFFFF0',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 4px 20px rgba(0,0,0,0.5)'
+    : '0 4px 20px rgba(0,0,0,0.1)',
 }));
 
 const Logo = styled('img')({
   height: '40px',
-  marginRight: '16px',
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
 });
 
-interface NavbarProps {
-  isAuthenticated: boolean;
-  onLogout: () => void;
-}
+const ThemeToggle = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+  marginLeft: 'auto',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(3, 181, 252, 0.2)'
+      : 'rgba(255, 140, 50, 0.2)',
+    transform: 'rotate(180deg)',
+  },
+}));
 
-const Navbar = ({ isAuthenticated, onLogout }: NavbarProps) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+const LogoContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  justifyContent: 'space-between',
+  padding: `${theme.spacing(2)} ${theme.spacing(2)}`,
+}));
+
+const NavButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+  margin: theme.spacing(1),
+  textTransform: 'uppercase',
+  fontWeight: 'bold',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.1)'
+      : 'rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-2px)',
+  },
+  transition: 'all 0.3s ease',
+}));
+
+const BHMemberButton = styled(Button)(({ theme }) => ({
+  color: '#000',
+  backgroundColor: '#FFD700',
+  margin: theme.spacing(1),
+  padding: '6px 16px',
+  textTransform: 'uppercase',
+  fontWeight: 'bold',
+  borderRadius: '20px',
+  '&:hover': {
+    backgroundColor: '#FFC800',
+    transform: 'translateY(-2px)',
+  },
+  transition: 'all 0.3s ease',
+}));
+
+const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -80,105 +130,121 @@ const Navbar = ({ isAuthenticated, onLogout }: NavbarProps) => {
     handleClose();
   };
 
-  const handleLogout = () => {
-    onLogout();
-    handleClose();
+  const handleLogoClick = () => {
     navigate('/');
   };
 
   return (
-    <StyledAppBar position="fixed">
-      <StyledToolbar>
-        <Logo src="/planeta-cinema-logo.png" alt="Planeta Cinema" />
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            flexGrow: 1,
-            color: (theme) =>
-              theme.palette.mode === 'dark' ? '#ffffff' : '#333333',
-            ml: 2,
-          }}
-        >
-          Planeta Cinema
-        </Typography>
-
-        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <NavButton
-            startIcon={<MovieIcon />}
-            onClick={() => handleNavigation('/cartelera')}
-          >
-            Cartelera
-          </NavButton>
-          <NavButton
-            startIcon={<LocalActivityIcon />}
-            onClick={() => handleNavigation('/eventos')}
-          >
-            Eventos
-          </NavButton>
-          <NavButton
-            startIcon={<InfoIcon />}
-            onClick={() => handleNavigation('/sobre-nosotros')}
-          >
-            Sobre Nosotros
-          </NavButton>
-          
-          {isAuthenticated ? (
-            <NavButton
-              startIcon={<ExitToAppIcon />}
-              onClick={handleLogout}
+    <>
+      <StyledAppBar position="fixed">
+        <StyledToolbar>
+          <LogoContainer onClick={handleLogoClick}>
+            <Logo
+              src="/planeta-cinema-logo.png"
+              alt="Planeta Cinema"
+              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                e.currentTarget.src = '/placeholder-logo.png';
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                color: mode === 'dark' ? '#fff' : '#000',
+                display: { xs: 'none', sm: 'block' },
+                fontWeight: 'bold',
+              }}
             >
-              Cerrar Sesión
+              Planeta Cinema
+            </Typography>
+          </LogoContainer>
+
+          <Box sx={{ 
+            display: { xs: 'none', md: 'flex' }, 
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <NavButton 
+              onClick={() => handleNavigation('/cartelera')}
+              startIcon={<Movie />}
+            >
+              Cartelera
             </NavButton>
-          ) : (
-            <NavButton
-              startIcon={<PersonIcon />}
+            <NavButton 
+              onClick={() => handleNavigation('/eventos')}
+              startIcon={<Event />}
+            >
+              Eventos
+            </NavButton>
+            <NavButton 
+              onClick={() => handleNavigation('/contact')}
+              startIcon={<Info />}
+            >
+              Contáctanos
+            </NavButton>
+            <NavButton 
               onClick={() => handleNavigation('/login')}
+              startIcon={<Person />}
             >
               Iniciar Sesión
             </NavButton>
-          )}
-        </Box>
+            <BHMemberButton 
+              onClick={() => handleNavigation('/bh-member')}
+              startIcon={<Star />}
+            >
+              BH Member
+            </BHMemberButton>
+            <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
+              {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+            </ThemeToggle>
+          </Box>
 
-        <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            aria-label="menu"
-            onClick={handleMenu}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={() => handleNavigation('/cartelera')}>
-              <MovieIcon sx={{ mr: 1 }} /> Cartelera
-            </MenuItem>
-            <MenuItem onClick={() => handleNavigation('/eventos')}>
-              <LocalActivityIcon sx={{ mr: 1 }} /> Eventos
-            </MenuItem>
-            <MenuItem onClick={() => handleNavigation('/sobre-nosotros')}>
-              <InfoIcon sx={{ mr: 1 }} /> Sobre Nosotros
-            </MenuItem>
-            
-            {isAuthenticated ? (
-              <MenuItem onClick={handleLogout}>
-                <ExitToAppIcon sx={{ mr: 1 }} /> Cerrar Sesión
+          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-label="menu"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={() => handleNavigation('/cartelera')}>
+                <Movie sx={{ mr: 1 }} /> Cartelera
               </MenuItem>
-            ) : (
+              <MenuItem onClick={() => handleNavigation('/eventos')}>
+                <Event sx={{ mr: 1 }} /> Eventos
+              </MenuItem>
+              <MenuItem onClick={() => handleNavigation('/contact')}>
+                <Info sx={{ mr: 1 }} /> Contáctanos
+              </MenuItem>
               <MenuItem onClick={() => handleNavigation('/login')}>
-                <PersonIcon sx={{ mr: 1 }} /> Iniciar Sesión
+                <Person sx={{ mr: 1 }} /> Iniciar Sesión
               </MenuItem>
-            )}
-          </Menu>
-        </Box>
-      </StyledToolbar>
-    </StyledAppBar>
+              <MenuItem onClick={() => handleNavigation('/bh-member')}>
+                <Star sx={{ mr: 1 }} /> BH Member
+              </MenuItem>
+            </Menu>
+          </Box>
+        </StyledToolbar>
+      </StyledAppBar>
+    </>
   );
 };
 
-export default Navbar;
+export default Navbar; 

@@ -1,359 +1,250 @@
-import React, { useState, useEffect } from 'react'; 
-import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  IconButton,
-  styled,
-  Button,
-} from '@mui/material';
-import Brightness4 from '@mui/icons-material/Brightness4';
-import Brightness7 from '@mui/icons-material/Brightness7';
+import React from 'react';
+import { Box, Grid, Typography, Button, styled } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import MovieDetails from './MovieDetails';
-
-interface Movie {
-  id: number;
-  title: string;
-  imageUrl: string;
-  isTop?: boolean;
-  duration: number;
-  description: string;
-  genre: string[];
-  rating: string;
-}
 
 interface MovieShowcaseProps {
   mode: 'dark' | 'light';
   onModeChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const StyledContainer = styled(Container)(({ theme }) => ({
+interface Movie {
+  id: string;
+  title: string;
+  imageUrl: string;
+  isTop?: boolean;
+}
+
+// Función para generar un color aleatorio para los placeholders
+const getRandomColor = () => {
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
+    '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB',
+    '#FF8C32', '#03b5fc', '#2ECC71', '#F1C40F'
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+const movies: Movie[] = [
+  // TOP 5
+  { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true },
+  { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl:'/img/capitan.jpg', isTop: true },
+  { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl:'/img/titan.jpg', isTop: true },
+  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true },
+  { id: '11', title: 'FLOW', imageUrl:'/img/flow.jpg', isTop: true },
+  // Cartelera Regular
+  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg' },
+  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg' },
+  { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl:'/img/bruja.jpg' },
+  { id: '8', title: 'ARGYLLE', imageUrl:'/img/argylle.jpg' },
+  { id: '9', title: 'NOVOCAINE', imageUrl:'/img/novocaide.jpg' },
+  { id: '10', title: 'MICKEY 17', imageUrl:'/img/my17.jpg' },
+  { id: '12', title: 'EL MONO', imageUrl:'/img/elmono.jpg' },
+  { id: '13', title: 'OPERACION PANDA', imageUrl:'/img/oppanda.jpg' },
+  { id: '15', title: 'AUN ESTOY AQUI', imageUrl:'/img/aun.jpg' },
+  { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/brutalista.jpg' },
+  { id: '17', title: 'ANORA', imageUrl:'/img/anora.jpg' },
+  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/soc3.jpg' },
+
+];
+
+const ShowcaseContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
-  paddingTop: theme.spacing(8),
-  background: theme.palette.mode === 'dark'
-    ? 'linear-gradient(135deg, #0a192f 0%, #000000 100%)'
-    : 'linear-gradient(135deg, #f0f8ff 0%, #87ceeb 100%)',
+  width: '100%',
+  backgroundColor: theme.palette.mode === 'dark' ? '#0a192f' : '#f0f8ff',
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const ContentContainer = styled(Box)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(3),
+  paddingTop: theme.spacing(10),
+  overflowY: 'auto',
+  maxWidth: '1400px',
+  margin: '0 auto',
+  width: '100%',
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '2.5rem',
+  fontWeight: 700,
+  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(4),
+  color: theme.palette.mode === 'dark' ? '#fff' : '#1a237e',
+  position: 'relative',
+  paddingLeft: theme.spacing(2),
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    left: 0,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: '4px',
+    height: '80%',
+    background: theme.palette.mode === 'dark' ? '#03b5fc' : '#ff8c32',
+    borderRadius: '4px',
+  },
 }));
 
 const MovieCard = styled(Box)(({ theme }) => ({
   position: 'relative',
-  borderRadius: '8px',
+  borderRadius: '12px',
   overflow: 'hidden',
-  transition: 'transform 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    '& .movie-overlay': {
-      opacity: 1,
-    },
-  },
-}));
-
-const MovieImage = styled('img')({
-  width: '100%',
-  height: 'auto',
-  display: 'block',
-});
-
-const MovieOverlay = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  padding: '20px',
-  background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%)',
-  opacity: 0,
-  transition: 'opacity 0.3s ease-in-out',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 16px rgba(0,0,0,0.4)'
+    : '0 8px 16px rgba(0,0,0,0.1)',
+  transition: 'all 0.3s ease-in-out',
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  gap: '10px',
-}));
-
-const BuyButton = styled(Button)(({ theme }) => ({
-  backgroundColor: '#ff8c32',
-  color: 'white',
   '&:hover': {
-    backgroundColor: '#ff7b1f',
+    transform: 'translateY(-8px)',
+    boxShadow: theme.palette.mode === 'dark' 
+      ? '0 12px 24px rgba(3, 181, 252, 0.2)'
+      : '0 12px 24px rgba(255, 140, 50, 0.2)',
   },
-  width: '100%',
-  maxWidth: '200px',
 }));
 
-const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '2rem',
-  fontWeight: 600,
-  marginBottom: theme.spacing(4),
-  color: theme.palette.mode === 'dark' ? 'white' : '#2c3e50',
+// const MoviePlaceholder = styled(Box)<{ bgcolor: string }>(({ bgcolor }) => ({
+//   width: '100%',
+//   height: '400px',
+//   backgroundColor: bgcolor,
+//   display: 'flex',
+//   alignItems: 'center',
+//   justifyContent: 'center',
+//   position: 'relative',
+//   overflow: 'hidden',
+//   '&::after': {
+//     content: '""',
+//     position: 'absolute',
+//     top: 0,
+//     left: 0,
+//     right: 0,
+//     bottom: 0,
+//     background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+//   }
+// }));
+
+const MoviePlaceholder = styled(Box)<{ imageUrl: string }>(({ imageUrl }) => ({
+  width: '100%',
+  height: '400px',
+  backgroundImage: `url(${imageUrl})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+  overflow: 'hidden',
   '&::after': {
     content: '""',
-    display: 'block',
-    width: '60px',
-    height: '3px',
-    backgroundColor: '#ff8c32',
-    marginTop: '10px',
-  },
-}));
-
-const ThemeToggle = styled(IconButton)(({ theme }) => ({
-  position: 'fixed',
-  top: theme.spacing(2),
-  right: theme.spacing(2),
-  color: theme.palette.mode === 'dark' ? 'white' : '#1a237e',
-  background: theme.palette.mode === 'dark'
-    ? 'rgba(3, 181, 252, 0.1)'
-    : 'rgba(255, 140, 50, 0.1)',
-  '&:hover': {
-    background: theme.palette.mode === 'dark'
-      ? 'rgba(3, 181, 252, 0.2)'
-      : 'rgba(255, 140, 50, 0.2)',
-  },
-}));
-
-const mockMovies: Movie[] = [
-  // TOP 5 - Películas destacadas
-  {
-    id: 1,
-    title: 'DUNE: PARTE DOS',
-    imageUrl: '/img/dune.jpg',
-    isTop: true,
-    duration: 166,
-    description: 'Paul Atreides se une a los Fremen y emprende un camino de venganza contra los conspiradores que destruyeron a su familia.',
-    genre: ['Ciencia Ficción', 'Aventura', 'Drama'],
-    rating: 'PG-13'
-  },
-  {
-    id: 2,
-    title: 'KUNG FU PANDA 4',
-    imageUrl: '/img/kungfupanda4.jpg',
-    isTop: true,
-    duration: 94,
-    description: 'Po debe entrenar a una nueva guerrera mientras enfrenta a una poderosa hechicera que busca controlar el reino espiritual.',
-    genre: ['Animación', 'Comedia', 'Acción'],
-    rating: 'PG'
-  },
-  {
-    id: 3,
-    title: 'GHOSTBUSTERS: IMPERIO HELADO',
-    imageUrl: '/img/ghost.jpg',
-    isTop: true,
-    duration: 115,
-    description: 'La familia Spengler regresa a donde comenzó todo: la icónica estación de bomberos de Nueva York.',
-    genre: ['Comedia', 'Aventura', 'Fantasía'],
-    rating: 'PG-13'
-  },
-  {
-    id: 4,
-    title: 'MADAME WEB',
-    imageUrl: '/img/madameweb.jpg',
-    isTop: true,
-    duration: 116,
-    description: 'Cassandra Webb desarrolla el poder de ver el futuro y debe proteger a tres jóvenes de un adversario mortal.',
-    genre: ['Acción', 'Aventura', 'Ciencia Ficción'],
-    rating: 'PG-13'
-  },
-  {
-    id: 5,
-    title: 'BOB MARLEY: ONE LOVE',
-    imageUrl: '/img/bobmarley.jpg',
-    isTop: true,
-    duration: 107,
-    description: 'La historia del icónico músico que inspiró a generaciones a través de su mensaje de amor y unidad.',
-    genre: ['Drama', 'Biografía', 'Musical'],
-    rating: 'PG-13'
-  },
-  // Películas regulares
-  {
-    id: 6,
-    title: 'DEMON SLAYER: KIMETSU NO YAIBA',
-    imageUrl: '/img/demonslayer.jpg',
-    duration: 110,
-    description: 'La última misión de Tanjiro lo lleva a enfrentar a poderosos demonios en el Distrito de la Herrería.',
-    genre: ['Anime', 'Acción', 'Fantasía'],
-    rating: 'PG-13'
-  },
-  {
-    id: 7,
-    title: 'IMAGINARY',
-    imageUrl: '/img/imaginary.jpg',
-    duration: 104,
-    description: 'Una mujer descubre que el oso de peluche de su infancia es una entidad terrorífica.',
-    genre: ['Terror', 'Suspenso'],
-    rating: 'PG-13'
-  },
-  {
-    id: 8,
-    title: 'ARTHUR EL REY',
-    imageUrl: '/img/arthur.jpg',
-    duration: 120,
-    description: 'Una nueva visión de la leyenda del Rey Arturo, llena de acción y aventura.',
-    genre: ['Aventura', 'Fantasía', 'Acción'],
-    rating: 'PG-13'
-  },
-  {
-    id: 9,
-    title: 'HÉROE POR ENCARGO',
-    imageUrl: '/img/heroe.jpg',
-    duration: 98,
-    description: 'Un ex militar se convierte en héroe inesperado cuando debe proteger a una familia.',
-    genre: ['Acción', 'Suspenso'],
-    rating: 'R'
-  },
-  {
-    id: 10,
-    title: 'VIDAS PASADAS',
-    imageUrl: '/img/vidaspasadas.jpg',
-    duration: 106,
-    description: 'Una historia de amor que atraviesa el tiempo y las culturas.',
-    genre: ['Drama', 'Romance'],
-    rating: 'PG-13'
-  },
-  {
-    id: 11,
-    title: 'TODAS MENOS TÚ',
-    imageUrl: '/img/todosmenos.jpg',
-    duration: 104,
-    description: 'Una comedia romántica sobre dos personas que se odian pero deben fingir ser pareja.',
-    genre: ['Comedia', 'Romance'],
-    rating: 'PG-13'
-  },
-  {
-    id: 12,
-    title: 'POBRES CRIATURAS',
-    imageUrl: '/img/pobrescriaturas.jpg',
-    duration: 141,
-    description: 'La historia de Bella Baxter, una joven revivida por un científico brillante.',
-    genre: ['Drama', 'Ciencia Ficción', 'Romance'],
-    rating: 'R'
-  },
-  {
-    id: 13,
-    title: 'ARGYLLE',
-    imageUrl: '/img/argylle.jpg',
-    duration: 139,
-    description: 'Una autora de espías se ve envuelta en una conspiración real de espionaje.',
-    genre: ['Acción', 'Suspenso', 'Comedia'],
-    rating: 'PG-13'
-  },
-  {
-    id: 14,
-    title: 'CHICAS PESADAS',
-    imageUrl: '/img/chicaspesadas.jpg',
-    duration: 112,
-    description: 'Un nuevo remake del clásico de comedia adolescente para una nueva generación.',
-    genre: ['Comedia', 'Drama'],
-    rating: 'PG-13'
-  },
-  {
-    id: 15,
-    title: 'WONKA',
-    imageUrl: '/img/wonka.jpg',
-    duration: 116,
-    description: 'La historia del joven Willy Wonka y cómo se convirtió en el famoso chocolatero.',
-    genre: ['Fantasía', 'Aventura', 'Musical'],
-    rating: 'PG'
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(45deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
   }
-];
+}));
+
+const MovieInfo = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+}));
+
+const ViewDetailsButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  backgroundColor: theme.palette.mode === 'dark' ? '#03b5fc' : '#ff8c32',
+  color: '#fff',
+  padding: theme.spacing(1.5),
+  fontWeight: 'bold',
+  letterSpacing: '1px',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark' ? '#0299d6' : '#ff7b1f',
+    transform: 'translateY(-2px)',
+  },
+  transition: 'all 0.3s ease',
+}));
 
 const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => {
-  // Estados existentes
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-  
-  // 🚨 Añade estos nuevos estados y funciones aquí 🚨
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado de autenticación
-  const handleLogout = () => setIsAuthenticated(false); // Función de logout
+  const navigate = useNavigate();
+  const topMovies = movies.filter(movie => movie.isTop);
+  const regularMovies = movies.filter(movie => !movie.isTop);
 
-  // Resto del código existente...
-  const topMovies = mockMovies.filter(movie => movie.isTop);
-  const regularMovies = mockMovies.filter(movie => !movie.isTop);
+  const handleViewDetails = (movieId: string) => {
+    navigate(`/movie/${movieId}`);
+  };
 
-  if (selectedMovie) {
-    return (
-      <MovieDetails
-        mode={mode}
-        movie={selectedMovie}
-      />
-    );
-  }
+  const MovieGrid = ({ movies, columns }: { movies: Movie[], columns: number }) => (
+    <Grid container spacing={3}>
+      {movies.map((movie) => (
+        <Grid item xs={12} sm={6} md={12/columns} key={movie.id}>
+          <MovieCard>
+            <MoviePlaceholder imageUrl={movie.imageUrl}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: '#fff',
+                  textAlign: 'center',
+                  padding: 2,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                  fontSize: '1rem',
+                  maxWidth: '80%',
+                  position: 'relative',
+                  zIndex: 1,
+                }}
+              >
+                
+              </Typography>
+            </MoviePlaceholder>
+            <MovieInfo>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  mb: 2,
+                  color: mode === 'dark' ? '#fff' : '#000',
+                  fontSize: '1rem',
+                  lineHeight: 1.4,
+                }}
+              >
+                {movie.title}
+              </Typography>
+              <ViewDetailsButton
+                variant="contained"
+                fullWidth
+                onClick={() => handleViewDetails(movie.id)}
+              >
+                VER DETALLES
+              </ViewDetailsButton>
+            </MovieInfo>
+          </MovieCard>
+        </Grid>
+      ))}
+    </Grid>
+  );
 
   return (
-    <StyledContainer>
-      <Navbar 
-        isAuthenticated={isAuthenticated} 
-        onLogout={handleLogout}
-        mode={mode}
-      />
-      <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
-        {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-      </ThemeToggle>
-      <Box sx={{ py: 8 }}>
-        <Typography
-          variant="h2"
-          align="center"
-          sx={{
-            fontSize: { xs: '2rem', md: '2.5rem' },
-            fontWeight: 700,
-            mb: 4,
-            color: mode === 'dark' ? 'white' : '#1a237e',
-            textShadow: mode === 'dark'
-              ? '0 0 20px rgba(3, 181, 252, 0.2)'
-              : '0 0 20px rgba(255, 140, 50, 0.2)',
-          }}
-        >
-          Cartelera Actual
-        </Typography>
-
-        {/* TOP 5 Section */}
-        <SectionTitle variant="h2">TOP 5</SectionTitle>
-        <Grid container spacing={4} sx={{ mb: 8 }}>
-          {topMovies.map((movie) => (
-            <Grid item xs={12} sm={6} md={4} lg={2.4} key={movie.id}>
-              <MovieCard>
-                <MovieImage src={movie.imageUrl} alt={movie.title} />
-                <MovieOverlay className="movie-overlay">
-                  <Typography variant="h6" align="center" sx={{ color: 'white', fontWeight: 600 }}>
-                    {movie.title}
-                  </Typography>
-                  <BuyButton
-                    variant="contained"
-                    onClick={() => setSelectedMovie(movie)}
-                  >
-                    COMPRAR
-                  </BuyButton>
-                </MovieOverlay>
-              </MovieCard>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Regular Movies Section */}
-        <SectionTitle variant="h2">CARTELERA</SectionTitle>
-        <Grid container spacing={4}>
-          {regularMovies.map((movie) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={movie.id}>
-              <MovieCard>
-                <MovieImage src={movie.imageUrl} alt={movie.title} />
-                <MovieOverlay className="movie-overlay">
-                  <Typography variant="h6" align="center" sx={{ color: 'white', fontWeight: 600 }}>
-                    {movie.title}
-                  </Typography>
-                  <BuyButton
-                    variant="contained"
-                    onClick={() => setSelectedMovie(movie)}
-                  >
-                    COMPRAR
-                  </BuyButton>
-                </MovieOverlay>
-              </MovieCard>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    </StyledContainer>
+    <ShowcaseContainer>
+      <Navbar mode={mode} onModeChange={onModeChange} />
+      <ContentContainer>
+        <SectionTitle>
+          TOP 5
+        </SectionTitle>
+        <MovieGrid movies={topMovies} columns={5} />
+        
+        <SectionTitle>
+          CARTELERA
+        </SectionTitle>
+        <MovieGrid movies={regularMovies} columns={4} />
+      </ContentContainer>
+    </ShowcaseContainer>
   );
 };
 

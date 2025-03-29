@@ -9,6 +9,7 @@ import {
 import BookingSystem from './BookingSystem';
 import SnackBarMenu, { Combo } from './SnackBar';
 import RoomSelection from './RoomSelection';
+import { rooms } from './shared/RoomTypes';
 
 interface Seat {
   id: number;
@@ -16,10 +17,11 @@ interface Seat {
   number: number;
   isOccupied: boolean;
   isSelected: boolean;
+  isHandicap?: boolean;
+  isReclinable?: boolean;
 }
 
 const steps = [
-  'Seleccionar Sala',
   'Reservar Asientos',
   'Elegir Combos',
   'Finalizar Compra'
@@ -28,7 +30,12 @@ const steps = [
 interface PurchaseFlowProps {
   mode: 'dark' | 'light';
   movieId: string;
+  movieTitle: string;
+  selectedTime: string;
+  selectedRoom: string;
+  selectedLanguage: string;
   isLoggedIn: boolean;
+  onBack: () => void;
 }
 
 const MainContent = styled.div`
@@ -157,33 +164,56 @@ const TotalPrice = styled.div`
   text-align: right;
 `;
 
-const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ mode, movieId, isLoggedIn }) => {
+const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ 
+  mode, 
+  movieId, 
+  movieTitle,
+  selectedTime,
+  selectedRoom,
+  selectedLanguage,
+  isLoggedIn, 
+  onBack 
+}) => {
   const [activeStep, setActiveStep] = useState(0);
-  const [selectedRoom, setSelectedRoom] = useState('');
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [selectedCombos, setSelectedCombos] = useState<Combo[]>([]);
   const navigate = useNavigate();
 
   const handleNext = () => {
-    if (!isLoggedIn && activeStep === 2) {
-      sessionStorage.setItem('purchaseState', JSON.stringify({
-        movieId,
-        selectedRoom,
-        selectedSeats,
-        selectedCombos,
-        returnStep: activeStep
-      }));
-      navigate('/login');
-      return;
-    }
-
-    if (activeStep === 0 && !selectedRoom) {
-      alert('Por favor, selecciona una sala');
-      return;
-    }
-
-    if (activeStep === 1 && selectedSeats.length === 0) {
+    if (activeStep === 0 && selectedSeats.length === 0) {
       alert('Por favor, selecciona al menos un asiento');
+      return;
+    }
+
+    if (activeStep === steps.length - 1) {
+      // Calcular el precio total
+      const selectedRoomData = rooms[selectedRoom];
+      const ticketPrice = parseFloat(selectedRoomData.price.replace('$', ''));
+      const ticketsTotal = ticketPrice * selectedSeats.length;
+      const combosTotal = selectedCombos.reduce((total, combo) => total + (combo.price * combo.quantity), 0);
+      const total = ticketsTotal + combosTotal;
+
+      // Navegar a la página de pago con todos los detalles
+      navigate('/payment', {
+        state: {
+          type: 'movie',
+          items: [
+            {
+              name: `${movieTitle} - ${selectedRoomData.name}`,
+              price: ticketsTotal,
+              description: `Función: ${selectedTime} - Asientos: ${selectedSeats.map(seat => `${seat.row}${seat.number}`).join(', ')}`,
+              quantity: selectedSeats.length
+            },
+            ...selectedCombos.map(combo => ({
+              name: combo.name,
+              price: combo.price * combo.quantity,
+              description: combo.description,
+              quantity: combo.quantity
+            }))
+          ],
+          total
+        }
+      });
       return;
     }
 
@@ -191,11 +221,11 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ mode, movieId, isLoggedIn }
   };
 
   const handleBack = () => {
+    if (activeStep === 0 && onBack) {
+      onBack();
+      return;
+    }
     setActiveStep((prevStep) => prevStep - 1);
-  };
-
-  const handleRoomSelection = (room: string) => {
-    setSelectedRoom(room);
   };
 
   const handleSeatsSelected = (seats: Seat[]) => {
@@ -210,37 +240,59 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ mode, movieId, isLoggedIn }
     switch (step) {
       case 0:
         return (
-          <RoomSelection
-            mode={mode}
-            onRoomSelected={handleRoomSelection}
-            selectedRoom={selectedRoom}
-          />
+          <>
+            <Title currentTheme={mode}>Selección de Asientos - {movieTitle}</Title>
+            <Subtitle currentTheme={mode}>
+              Sala: {rooms[selectedRoom].name} - Horario: {selectedTime}
+            </Subtitle>
+            <BookingSystem 
+              mode={mode} 
+              onSeatsSelected={handleSeatsSelected}
+              selectedRoom={selectedRoom}
+            />
+          </>
         );
       case 1:
         return (
-          <BookingSystem 
-            mode={mode} 
-            onSeatsSelected={handleSeatsSelected}
-            selectedRoom={selectedRoom}
-          />
+          <>
+            <Title currentTheme={mode}>Selección de Combos - {movieTitle}</Title>
+            <Subtitle currentTheme={mode}>
+              ¡Completa tu experiencia con nuestros deliciosos combos!
+            </Subtitle>
+            <SnackBarMenu 
+              mode={mode}
+              onCombosSelected={handleCombosSelected}
+              showOnlyInBooking={true}
+            />
+          </>
         );
       case 2:
-        return (
-          <SnackBarMenu 
-            mode={mode}
-            onCombosSelected={handleCombosSelected}
-            showOnlyInBooking={true}
-          />
-        );
-      case 3:
+        const selectedRoomData = rooms[selectedRoom];
+        const ticketPrice = parseFloat(selectedRoomData.price.replace('$', ''));
+        const ticketsTotal = ticketPrice * selectedSeats.length;
+        const combosTotal = selectedCombos.reduce((total, combo) => total + (combo.price * combo.quantity), 0);
+        const total = ticketsTotal + combosTotal;
+
         return (
           <SummaryContainer>
             <SummaryTitle>Resumen de Compra</SummaryTitle>
             <SummaryItem>
-              <strong>Sala:</strong> {selectedRoom}
+              <strong>Película:</strong> {movieTitle}
+            </SummaryItem>
+            <SummaryItem>
+              <strong>Función:</strong> {selectedTime}
+            </SummaryItem>
+            <SummaryItem>
+              <strong>Sala:</strong> {selectedRoomData.name} ({selectedRoomData.type})
+            </SummaryItem>
+            <SummaryItem>
+              <strong>Idioma:</strong> {selectedLanguage === 'esp' ? 'Español Latino' : 'Subtitulada'}
             </SummaryItem>
             <SummaryItem>
               <strong>Asientos:</strong> {selectedSeats.map(seat => `${seat.row}${seat.number}`).join(', ')}
+            </SummaryItem>
+            <SummaryItem>
+              <strong>Subtotal Entradas:</strong> ${ticketsTotal.toFixed(2)}
             </SummaryItem>
             {selectedCombos.length > 0 && (
               <>
@@ -252,18 +304,18 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ mode, movieId, isLoggedIn }
                     </div>
                   ))}
                 </SummaryItem>
+                <SummaryItem>
+                  <strong>Subtotal Combos:</strong> ${combosTotal.toFixed(2)}
+                </SummaryItem>
               </>
             )}
             <TotalPrice>
-              Total: ${(
-                selectedSeats.length * 10 +
-                selectedCombos.reduce((total, combo) => total + combo.price * combo.quantity, 0)
-              ).toFixed(2)}
+              Total a Pagar: ${total.toFixed(2)}
             </TotalPrice>
           </SummaryContainer>
         );
       default:
-        return 'Unknown step';
+        return null;
     }
   };
 
@@ -271,53 +323,29 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ mode, movieId, isLoggedIn }
     <MainContent>
       <StepperContainer>
         {steps.map((label, index) => (
-          <Step 
-            key={label}
-            isActive={activeStep === index}
-            isCompleted={activeStep > index}
-          >
-            <StepCircle 
-              isActive={activeStep === index}
-              isCompleted={activeStep > index}
-            >
+          <Step key={index} isActive={activeStep === index} isCompleted={activeStep > index}>
+            <StepCircle isActive={activeStep === index} isCompleted={activeStep > index}>
               {activeStep > index ? '✓' : index + 1}
             </StepCircle>
-            <StepLabel isActive={activeStep === index}>
-              {label}
-            </StepLabel>
+            <StepLabel isActive={activeStep === index}>{label}</StepLabel>
           </Step>
         ))}
       </StepperContainer>
 
-      {activeStep === steps.length ? (
-        <SummaryContainer>
-          <SummaryTitle>¡Compra completada con éxito!</SummaryTitle>
-          <NavigationButton 
-            onClick={() => navigate('/')}
-            isForward
-          >
-            Volver al Inicio
-          </NavigationButton>
-        </SummaryContainer>
-      ) : (
-        <>
-          {getStepContent(activeStep)}
-          <ButtonContainer>
-            <NavigationButton
-              onClick={handleBack}
-              disabled={activeStep === 0}
-            >
-              Atrás
-            </NavigationButton>
-            <NavigationButton
-              onClick={handleNext}
-              isForward
-            >
-              {activeStep === steps.length - 1 ? 'Finalizar' : 'Siguiente'}
-            </NavigationButton>
-          </ButtonContainer>
-        </>
-      )}
+      {getStepContent(activeStep)}
+
+      <ButtonContainer>
+        <NavigationButton onClick={handleBack}>
+          {activeStep === 0 ? 'VOLVER A DETALLES' : 'ANTERIOR'}
+        </NavigationButton>
+        <NavigationButton
+          isForward
+          onClick={handleNext}
+          disabled={activeStep === 0 && selectedSeats.length === 0}
+        >
+          {activeStep === steps.length - 1 ? 'PROCEDER AL PAGO' : 'SIGUIENTE'}
+        </NavigationButton>
+      </ButtonContainer>
     </MainContent>
   );
 };
