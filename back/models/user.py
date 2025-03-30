@@ -1,9 +1,7 @@
 from config.database import db
 from datetime import datetime
-from werkzeug.security import check_password_hash
 
-
-class Cliente(db.Model):
+class User(db.Model):
     __tablename__ = 'clientes'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -13,17 +11,6 @@ class Cliente(db.Model):
     fecha_nacimiento = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-    telefono = db.Column(db.String(20), nullable=True)
-    es_miembro = db.Column(db.Integer, default=0)  # 0 = usuario normal, 1 = admin
-
-    reservas = db.relationship('Reserva', back_populates='cliente', cascade='all, delete-orphan', lazy=True)
-    membresias = db.relationship('Membership', backref='cliente', lazy=True)
-
-    def __repr__(self):
-        return f'<Cliente {self.email}>'
-    
-    def verificar_password(self, password: str) -> bool:
-        return check_password_hash(self.password, password)  # ✅ Orden correcto
 
     def __init__(self, nombre, email, password, fecha_nacimiento):
         self.nombre = nombre
@@ -39,4 +26,4 @@ class Cliente(db.Model):
             'fecha_nacimiento': self.fecha_nacimiento.isoformat() if self.fecha_nacimiento else None,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
-        }
+        } 

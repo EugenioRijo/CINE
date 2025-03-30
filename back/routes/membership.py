@@ -1,16 +1,15 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
-from models.user import User
 from models.membership import Membership
-from database import db
+from config.database import db
 
 membership_bp = Blueprint('membership', __name__)
 
 @membership_bp.route('/api/membership/status', methods=['GET'])
 def get_membership_status():
     # Obtener el ID del usuario del token (asumiendo que tienes middleware de autenticación)
-    current_user_id = request.headers.get('user-id')  # O como obtengas el ID del usuario
+    current_user_id = request.headers.get('user-id')  
     
     if not current_user_id:
         return jsonify({

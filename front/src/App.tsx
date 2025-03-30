@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 import WelcomePage from './components/WelcomePage';
 import MovieShowcase from './components/MovieShowcase';
-import SignInSide from './SignInSide';
+import SignInSide from './components/SignInSide';
 import { SnackBar } from './components/SnackBar';
 import NotFound from './components/NotFound';
 import BHMember from './components/BHMember';

@@ -4,10 +4,10 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import { keyframes, styled } from '@mui/material/styles';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import { AppTheme } from './theme';
-import SignInCard from './components/SignInCard';
-import Content from './components/Content';
-import authService from './services/authService';
+import { AppTheme } from '../theme';
+import SignInCard from './SignInCard';
+import Content from './Content';
+import authService from '../services/authService';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -253,47 +253,7 @@ const SignInSide: React.FC<SignInSideProps> = ({ mode, onModeChange }) => {
             <Content mode={mode} />
           </Box>
           <Box sx={{ flex: 1, width: '100%', maxWidth: 400 }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                {!isLogin && (
-                  <>
-                    <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="nombre"
-                      label="Nombre Completo"
-                      name="nombre"
-                      autoComplete="name"
-                      value={formData.nombre}
-                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    />
-                    <DatePicker
-                      label="Fecha de Nacimiento"
-                      value={formData.fecha_nacimiento}
-                      onChange={(newValue) => setFormData({ ...formData, fecha_nacimiento: newValue })}
-                      disableFuture
-                      sx={{ mt: 2, width: '100%' }}
-                    />
-                    <TextField
-                      margin="normal"
-                      fullWidth
-                      id="telefono"
-                      label="Teléfono"
-                      name="telefono"
-                      autoComplete="tel"
-                      value={formData.telefono}
-                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    />
-                  </>
-                )}
-                {error && (
-                  <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-                    {error}
-                  </Typography>
-                )}
-              </Box>
-            </LocalizationProvider>
+            <SignInCard mode={mode} onModeChange={onModeChange} />
           </Box>
         </Stack>
       </Stack>
