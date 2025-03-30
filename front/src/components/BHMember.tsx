@@ -31,6 +31,7 @@ import {
   RocketLaunch,
 } from '@mui/icons-material';
 import RocketBackButton from './shared/RocketBackButton';
+import { usePrices } from '../contexts/PriceContext';
 
 interface BHMemberProps {
   mode: 'dark' | 'light';
@@ -173,9 +174,17 @@ const BackButton = styled(IconButton)(() => ({
   },
 }));
 
-const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
+const BHMember: React.FC<BHMemberProps> = ({ mode }) => {
   const navigate = useNavigate();
   const rocketRef = useRef<HTMLButtonElement>(null);
+  const { 
+    membershipPriceUSD, 
+    membershipPriceVEF, 
+    regularTicketUSD,
+    formatPrice, 
+    formatUSD,
+    isLoading 
+  } = usePrices();
 
   const handleReturn = () => {
     if (rocketRef.current) {
@@ -192,8 +201,8 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
         type: 'membership',
         items: [
           {
-            name: 'BH Member Mensual',
-            price: 10.00,
+            name: 'Nova Prime Member Mensual',
+            price: membershipPriceUSD,
             description: 'Membresía mensual',
           }
         ]
@@ -209,28 +218,28 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
     },
     {
       icon: <AttachMoney />,
-      title: 'Descuentos Astronómicos',
-      description: 'Tan grandes como un agujero negro (términos y condiciones aplican)*',
+      title: 'Descuentos Estelares',
+      description: `Ahorra ${formatUSD(regularTicketUSD * 0.5)} en cada entrada (50% de descuento)`,
     },
     {
       icon: <Fastfood />,
       title: 'Combos Gravitacionales',
-      description: 'Palomitas que desafían la física... o eso decimos',
+      description: '25% de descuento en todos los combos',
     },
     {
       icon: <MovieFilter />,
-      title: 'Pre-estrenos Cuánticos',
-      description: 'Ve películas antes que el resto del universo paralelo',
+      title: 'Pre-estrenos Exclusivos',
+      description: 'Acceso anticipado a estrenos seleccionados',
     },
     {
       icon: <EventSeat />,
-      title: 'Asientos Dimensionales',
-      description: 'Tan cómodos que podrías caer en otra dimensión',
+      title: 'Asientos Preferenciales',
+      description: 'Reserva prioritaria en la zona premium',
     },
     {
       icon: <Rocket />,
-      title: 'Experiencia Intergaláctica',
-      description: 'O al menos eso te parecerá después de nuestros precios',
+      title: 'Experiencia Nova Prime',
+      description: 'Acumula puntos para premios espaciales',
     },
   ];
 
@@ -271,7 +280,7 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}
           >
-            "Porque el dinero sí puede comprar la felicidad... ¿o era al revés?"
+            "El universo del cine a precios que no son de otro mundo"
           </Typography>
 
           <Grid container spacing={4}>
@@ -308,10 +317,26 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
             <AnimatedCard delay="1.2s">
               <CardContent>
                 <Typography variant="h3" sx={{ color: '#FFD700', fontWeight: 900 }}>
-                  $10.00/mes*
+                  {isLoading ? (
+                    "Cargando precios..."
+                  ) : (
+                    <>
+                      {formatUSD(membershipPriceUSD)}/mes*
+                      <Typography 
+                        variant="h5" 
+                        sx={{ 
+                          color: 'rgba(255,255,255,0.7)',
+                          mt: 1,
+                          fontSize: '1.5rem'
+                        }}
+                      >
+                        ({membershipPriceVEF ? formatPrice(membershipPriceVEF) : ''})
+                      </Typography>
+                    </>
+                  )}
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: 'rgba(255,255,255,0.7)' }}>
-                  *Precio especial de lanzamiento. Puedes subir más rápido que la inflación.
+                  *Precio actualizado según la tasa del BCV.
                 </Typography>
                 <Typography 
                   variant="body1" 
@@ -324,7 +349,7 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
                     border: '1px dashed #FFD700'
                   }}
                 >
-                  ¡30 películas con 50% de descuento!* 
+                  ¡30 entradas con 50% de descuento al mes!* 
                   <Typography 
                     component="span" 
                     sx={{ 
@@ -335,7 +360,9 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
                       fontStyle: 'italic'
                     }}
                   >
-                    *Porque sabemos que no tendrás tiempo de ver más de 2 al mes... ¡pero hey, la intención es lo que cuenta!
+                    *Ahorra hasta {formatUSD(regularTicketUSD * 0.5 * 30)} al mes si usas todos tus descuentos.
+                    <br/>
+                    Los descuentos no utilizados no son acumulables para el siguiente mes.
                   </Typography>
                 </Typography>
                 <GoldButton
@@ -344,7 +371,7 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
                   sx={{ mt: 4 }}
                   onClick={handlePayment}
                 >
-                  ¡ÚNETE AL LADO OSCURO!
+                  ¡ÚNETE A LA ÉLITE ESTELAR!
                 </GoldButton>
               </CardContent>
             </AnimatedCard>
@@ -361,7 +388,7 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
               color: 'rgba(255,255,255,0.7)',
             }}
           >
-            *Ningún agujero negro fue dañado en la creación de esta membresía. Los descuentos sí podrían dañar tu cartera si no los usas.
+            *Los descuentos son válidos solo para el titular de la membresía. No aplica en estrenos ni funciones especiales.
           </Typography>
         </ContentWrapper>
       </StyledContainer>

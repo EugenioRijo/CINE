@@ -17,8 +17,13 @@ import Payment from './components/Payment';
 import MovieDetails from './components/MovieDetails';
 import ContactForm from './components/ContactForm';
 import Events from './components/Events';
-import { AuthProvider } from './components/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import AdminStats from './components/AdminStats';
+import { PriceProvider } from './contexts/PriceContext';
+import { BcvProvider } from './contexts/BcvContext';
+import { MembershipProvider } from './contexts/MembershipContext';
+import { AgeDiscountProvider } from './contexts/AgeDiscountContext';
+import { EventDiscountProvider } from './contexts/EventDiscountContext';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -34,28 +39,28 @@ function ScrollToTop() {
 }
 
 const AppContent = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mode, setMode] = useState<'light' | 'dark'>('dark');
   const navigate = useNavigate();
 
   const theme = createTheme({
     palette: {
-      mode: isDarkMode ? 'dark' : 'light',
+      mode,
       primary: {
-        main: isDarkMode ? '#03b5fc' : '#ff8c32',
+        main: mode === 'dark' ? '#03b5fc' : '#ff8c32',
       },
       secondary: {
-        main: isDarkMode ? '#1a2dd8' : '#ffaa50',
+        main: mode === 'dark' ? '#1a2dd8' : '#ffaa50',
       },
       background: {
-        default: isDarkMode ? '#0a192f' : '#f0f8ff',
-        paper: isDarkMode ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+        default: mode === 'dark' ? '#0a192f' : '#f0f8ff',
+        paper: mode === 'dark' ? '#1a202c' : '#ffffff',
       },
     },
     components: {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            background: isDarkMode
+            background: mode === 'dark'
               ? 'linear-gradient(135deg, #0a192f 0%, #000000 100%)'
               : 'linear-gradient(135deg, #f0f8ff 0%, #87ceeb 100%)',
             minHeight: '100vh',
@@ -68,7 +73,7 @@ const AppContent = () => {
   });
 
   const handleModeChange = () => {
-    setIsDarkMode((prevMode) => !prevMode);
+    setMode(mode === 'light' ? 'dark' : 'light');
   };
 
   const handleStartJourney = () => {
@@ -78,58 +83,70 @@ const AppContent = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <ScrollToTop />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <WelcomePage 
-                mode={isDarkMode ? 'dark' : 'light'} 
-                onStartJourney={handleStartJourney} 
-                onModeChange={handleModeChange} 
-              />
-            }
-          />
-          <Route
-            path="/cartelera"
-            element={<MovieShowcase mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="/login"
-            element={<SignInSide mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="/bh-member"
-            element={<BHMember mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="/payment"
-            element={<Payment mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="/movie/:id"
-            element={<MovieDetails mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="/contact"
-            element={<ContactForm mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="/eventos"
-            element={<Events mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
-          />
-          <Route
-            path="*"
-            element={<NotFound mode={isDarkMode ? 'dark' : 'light'} />}
-          />
-          <Route
-              path="/admin/estadisticas"
-              element={<AdminStats mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange}/>}
-            />
-        </Routes>
-        <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
-      </Box>
+      <AuthProvider>
+        <MembershipProvider>
+          <BcvProvider>
+            <PriceProvider>
+              <AgeDiscountProvider>
+                <EventDiscountProvider>
+                  <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                    <ScrollToTop />
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <WelcomePage 
+                            mode={mode === 'dark' ? 'dark' : 'light'} 
+                            onStartJourney={handleStartJourney} 
+                            onModeChange={handleModeChange} 
+                          />
+                        }
+                      />
+                      <Route
+                        path="/cartelera"
+                        element={<MovieShowcase mode={mode} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="/login"
+                        element={<SignInSide mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="/bh-member"
+                        element={<BHMember mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="/payment"
+                        element={<Payment mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="/movie/:id"
+                        element={<MovieDetails mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="/contact"
+                        element={<ContactForm mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="/eventos"
+                        element={<Events mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+                      />
+                      <Route
+                        path="*"
+                        element={<NotFound mode={mode === 'dark' ? 'dark' : 'light'} />}
+                      />
+                      <Route
+                        path="/admin/estadisticas"
+                        element={<AdminStats mode={mode === 'dark' ? 'dark' : 'light'} onModeChange={handleModeChange}/>}
+                      />
+                    </Routes>
+                    <SnackBar mode={mode === 'dark' ? 'dark' : 'light'} />
+                  </Box>
+                </EventDiscountProvider>
+              </AgeDiscountProvider>
+            </PriceProvider>
+          </BcvProvider>
+        </MembershipProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 };
@@ -137,9 +154,7 @@ const AppContent = () => {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <AppContent />
     </BrowserRouter>
   );
 }

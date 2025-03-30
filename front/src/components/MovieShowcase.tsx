@@ -1,7 +1,9 @@
 import React from 'react';
-import { Box, Grid, Typography, Button, styled } from '@mui/material';
+import { Box, Grid, Typography, Button, styled, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
+import PublicIcon from '@mui/icons-material/Public';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
 interface MovieShowcaseProps {
   mode: 'dark' | 'light';
@@ -13,6 +15,8 @@ interface Movie {
   title: string;
   imageUrl: string;
   isTop?: boolean;
+  isEstreno?: boolean;
+  isPreestreno?: boolean;
 }
 
 // Función para generar un color aleatorio para los placeholders
@@ -27,14 +31,14 @@ const getRandomColor = () => {
 
 const movies: Movie[] = [
   // TOP 5
-  { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true },
-  { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl:'/img/capitan.jpg', isTop: true },
+  { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true, isEstreno: true },
+  { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl:'/img/capitan.jpg', isTop: true, isEstreno: true },
   { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl:'/img/titan.jpg', isTop: true },
-  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true },
+  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true, isEstreno: true },
   { id: '11', title: 'FLOW', imageUrl:'/img/flow.jpg', isTop: true },
   // Cartelera Regular
-  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg' },
-  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg' },
+  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg', isPreestreno: true },
+  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg', isPreestreno: true },
   { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl:'/img/bruja.jpg' },
   { id: '8', title: 'ARGYLLE', imageUrl:'/img/argylle.jpg' },
   { id: '9', title: 'NOVOCAINE', imageUrl:'/img/novocaide.jpg' },
@@ -42,10 +46,9 @@ const movies: Movie[] = [
   { id: '12', title: 'EL MONO', imageUrl:'/img/elmono.jpg' },
   { id: '13', title: 'OPERACION PANDA', imageUrl:'/img/oppanda.jpg' },
   { id: '15', title: 'AUN ESTOY AQUI', imageUrl:'/img/aun.jpg' },
-  { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/brutalista.jpg' },
+  { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/brutalista.jpg', isEstreno: true },
   { id: '17', title: 'ANORA', imageUrl:'/img/anora.jpg' },
-  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/soc3.jpg' },
-
+  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/soc3.jpg', isEstreno: true },
 ];
 
 const ShowcaseContainer = styled(Box)(({ theme }) => ({
@@ -171,6 +174,51 @@ const ViewDetailsButton = styled(Button)(({ theme }) => ({
   transition: 'all 0.3s ease',
 }));
 
+const MovieBadge = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: 16,
+  left: 16,
+  zIndex: 10,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+}));
+
+const BadgeContainer = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  borderRadius: '20px',
+  padding: '4px 12px',
+  backdropFilter: 'blur(4px)',
+});
+
+const BadgeIcon = styled(Box)<{ type: 'estreno' | 'preestreno' }>(({ type }) => ({
+  backgroundColor: type === 'estreno' ? '#ff8c32' : '#03b5fc',
+  color: '#ffffff',
+  borderRadius: '50%',
+  width: 24,
+  height: 24,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+  '& svg': {
+    fontSize: 14,
+    filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.2))'
+  }
+}));
+
+const BadgeText = styled(Typography)({
+  color: '#ffffff',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px'
+});
+
 const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => {
   const navigate = useNavigate();
   const topMovies = movies.filter(movie => movie.isTop);
@@ -186,6 +234,26 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
         <Grid item xs={12} sm={6} md={12/columns} key={movie.id}>
           <MovieCard>
             <MoviePlaceholder imageUrl={movie.imageUrl}>
+              {(movie.isEstreno || movie.isPreestreno) && (
+                <MovieBadge>
+                  {movie.isEstreno && (
+                    <BadgeContainer>
+                      <BadgeIcon type="estreno">
+                        <PublicIcon />
+                      </BadgeIcon>
+                      <BadgeText>Estreno</BadgeText>
+                    </BadgeContainer>
+                  )}
+                  {movie.isPreestreno && (
+                    <BadgeContainer>
+                      <BadgeIcon type="preestreno">
+                        <RocketLaunchIcon />
+                      </BadgeIcon>
+                      <BadgeText>Preestreno</BadgeText>
+                    </BadgeContainer>
+                  )}
+                </MovieBadge>
+              )}
               <Typography
                 variant="h6"
                 sx={{
@@ -199,7 +267,6 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
                   zIndex: 1,
                 }}
               >
-                
               </Typography>
             </MoviePlaceholder>
             <MovieInfo>

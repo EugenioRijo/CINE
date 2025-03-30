@@ -11,6 +11,8 @@ import {
   Divider,
   styled,
   IconButton,
+  Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import {
   AccountBalanceWallet,
@@ -18,8 +20,13 @@ import {
   ArrowBack,
   Payments,
   CurrencyBitcoin,
+  Refresh,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useBcv } from '../contexts/BcvContext';
+import { useMembership } from '../contexts/MembershipContext';
+import { useAgeDiscount } from '../contexts/AgeDiscountContext';
+import { useEventDiscount } from '../contexts/EventDiscountContext';
 
 interface PaymentProps {
   mode: 'dark' | 'light';
@@ -40,7 +47,9 @@ interface LocationState {
     price: number;
     quantity?: number;
     description?: string;
+    type: string;
   }[];
+  total: number;
 }
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -135,15 +144,14 @@ const Payment: React.FC<PaymentProps> = ({ mode, onModeChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+  const { rate: bsRate } = useBcv();
+  const { isPremium, applyDiscount } = useMembership();
+  const { isElderly, applyDiscount: ageDiscountApply, discountPercentage } = useAgeDiscount();
+  const { calculateEventDiscount } = useEventDiscount();
   const [paymentData, setPaymentData] = useState<LocationState>({
     type: 'membership',
-    items: [
-      {
-        name: 'BH Member Mensual',
-        price: 10.00,
-        description: 'Membresía mensual',
-      }
-    ]
+    items: [],
+    total: 0
   });
 
   useEffect(() => {
@@ -196,11 +204,37 @@ const Payment: React.FC<PaymentProps> = ({ mode, onModeChange }) => {
   };
 
   const calculateTotal = () => {
-    return paymentData.items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+    let subtotal = 0;
+    
+    // Calcular subtotal de boletos
+    if (paymentData.items.some(item => item.type === 'ticket')) {
+      subtotal += paymentData.items
+        .filter(item => item.type === 'ticket')
+        .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+    }
+
+    // Calcular subtotal de combos y productos
+    subtotal += paymentData.items
+      .filter(item => item.type !== 'ticket')
+      .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+
+    // Aplicar descuento si el usuario es premium
+    const membershipDiscounted = applyDiscount(subtotal);
+
+    // Aplicar descuento si es persona mayor
+    const ageDiscounted = ageDiscountApply(membershipDiscounted);
+
+    // Aplicar descuento por evento si aplica
+    const { finalAmount: eventDiscounted, appliedDiscount } = calculateEventDiscount(ageDiscounted);
+    
+    // Convertir a bolívares
+    return {
+      total: bsRate ? eventDiscounted * bsRate : eventDiscounted,
+      appliedEventDiscount: appliedDiscount
+    };
   };
 
-  const total = calculateTotal();
-  const bsRate = 35.62; // Tasa de cambio USD a Bs
+  const { total, appliedEventDiscount } = calculateTotal();
 
   return (
     <StyledContainer>
@@ -231,9 +265,11 @@ const Payment: React.FC<PaymentProps> = ({ mode, onModeChange }) => {
       <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
           <PaymentCard>
-            <Typography variant="h6" sx={{ mb: 3, color: mode === 'dark' ? '#fff' : '#000' }}>
-              Detalles de la Compra
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" sx={{ color: mode === 'dark' ? '#fff' : '#000' }}>
+                Detalles de la Compra
+              </Typography>
+            </Box>
             {paymentData.items.map((item, index) => (
               <DetailRow key={index}>
                 <Typography>
@@ -303,6 +339,21 @@ const Payment: React.FC<PaymentProps> = ({ mode, onModeChange }) => {
                 <Typography>Bs.S {(total * bsRate).toFixed(2)}</Typography>
               </Box>
             </DetailRow>
+            {isPremium && (
+              <Typography variant="body1" color="success.main" sx={{ mt: 1 }}>
+                ¡Descuento de membresía premium aplicado!
+              </Typography>
+            )}
+            {isElderly && (
+              <Typography variant="body1" color="success.main" sx={{ mt: 1 }}>
+                ¡Descuento del {discountPercentage}% aplicado por ser adulto mayor!
+              </Typography>
+            )}
+            {appliedEventDiscount && (
+              <Typography variant="body1" color="success.main" sx={{ mt: 1 }}>
+                ¡{appliedEventDiscount.name}: {appliedEventDiscount.description}!
+              </Typography>
+            )}
             <Box sx={{ mt: 4 }}>
               <ConfirmButton
                 variant="contained"

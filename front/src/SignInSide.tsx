@@ -7,10 +7,26 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import { AppTheme } from './theme';
 import SignInCard from './components/SignInCard';
 import Content from './components/Content';
+import authService from './services/authService';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { es } from 'date-fns/locale';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TextField, Typography } from '@mui/material';
 
 interface SignInSideProps {
   mode: 'dark' | 'light';
   onModeChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+interface FormData {
+  nombre: string;
+  email: string;
+  password: string;
+  fecha_nacimiento: Date | null;
+  telefono?: string;
 }
 
 const orbitRotation = keyframes`
@@ -159,17 +175,50 @@ const TransitionEffect = styled(Box, {
   zIndex: 10,
 }));
 
-export default function SignInSide({ mode, onModeChange }: SignInSideProps) {
-  const [isTransitioning, setIsTransitioning] = React.useState(false);
+const SignInSide: React.FC<SignInSideProps> = ({ mode, onModeChange }) => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState<FormData>({
+    nombre: '',
+    email: '',
+    password: '',
+    fecha_nacimiento: null,
+    telefono: ''
+  });
+  const [error, setError] = useState<string>('');
+  const navigate = useNavigate();
 
-  const handleModeChange = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      onModeChange(event);
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 800);
-    }, 400);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+
+    try {
+      if (isLogin) {
+        await authService.login({
+          email: formData.email,
+          password: formData.password
+        });
+      } else {
+        if (!formData.fecha_nacimiento) {
+          setError('La fecha de nacimiento es requerida');
+          return;
+        }
+
+        // Validar edad antes de enviar
+        const { isValid, age } = authService.validateAge(formData.fecha_nacimiento.toISOString());
+        if (!isValid) {
+          setError(`Debes tener al menos 18 años para registrarte. Edad actual: ${age}`);
+          return;
+        }
+
+        await authService.register({
+          ...formData,
+          fecha_nacimiento: formData.fecha_nacimiento.toISOString().split('T')[0]
+        });
+      }
+      navigate('/cartelera');
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -189,32 +238,67 @@ export default function SignInSide({ mode, onModeChange }: SignInSideProps) {
           transition: 'background 1s ease-in-out',
         }}
       >
-        <PlanetarySystem mode={mode} isTransitioning={isTransitioning} />
-        <OrbitingPlanet mode={mode} isTransitioning={isTransitioning} />
-        <TransitionEffect mode={mode} isTransitioning={isTransitioning} />
+        <PlanetarySystem mode={mode} isTransitioning={false} />
+        <OrbitingPlanet mode={mode} isTransitioning={false} />
+        <TransitionEffect mode={mode} isTransitioning={false} />
         
         <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: { xs: 4, sm: 8 },
-            p: { xs: 2, sm: 4 },
-            m: 'auto',
-            position: 'relative',
-            zIndex: 1,
-            maxWidth: '1200px',
-            width: '100%'
-          }}
+          direction="row"
+          spacing={4}
+          alignItems="center"
+          justifyContent="center"
+          sx={{ width: '100%', maxWidth: 1200, margin: '0 auto', p: 4 }}
         >
-          <Box sx={{ flex: 1, width: '100%', maxWidth: 550 }}>
+          <Box sx={{ flex: 1 }}>
             <Content mode={mode} />
           </Box>
           <Box sx={{ flex: 1, width: '100%', maxWidth: 400 }}>
-            <SignInCard mode={mode} onModeChange={handleModeChange} />
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                {!isLogin && (
+                  <>
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      id="nombre"
+                      label="Nombre Completo"
+                      name="nombre"
+                      autoComplete="name"
+                      value={formData.nombre}
+                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    />
+                    <DatePicker
+                      label="Fecha de Nacimiento"
+                      value={formData.fecha_nacimiento}
+                      onChange={(newValue) => setFormData({ ...formData, fecha_nacimiento: newValue })}
+                      disableFuture
+                      sx={{ mt: 2, width: '100%' }}
+                    />
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      id="telefono"
+                      label="Teléfono"
+                      name="telefono"
+                      autoComplete="tel"
+                      value={formData.telefono}
+                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    />
+                  </>
+                )}
+                {error && (
+                  <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+                    {error}
+                  </Typography>
+                )}
+              </Box>
+            </LocalizationProvider>
           </Box>
         </Stack>
       </Stack>
     </AppTheme>
   );
-} 
+};
+
+export default SignInSide; 

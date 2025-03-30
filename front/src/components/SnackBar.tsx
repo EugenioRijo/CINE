@@ -5,9 +5,11 @@ import {
   Subtitle,
   ThemeProps
 } from './shared/CommonStyles';
-import { Typography, Button, Box } from '@mui/material';
+import { Typography, Button, Box, Card, CardContent, Grid as MuiGrid } from '@mui/material';
 import { styled as muiStyled } from '@mui/material/styles';
 import { Theme } from '@mui/material/styles';
+import { Add, Remove } from '@mui/icons-material';
+import { usePrices } from '../contexts/PriceContext';
 
 export interface Product {
   id: number;
@@ -57,7 +59,7 @@ const MainContent = styled.div`
   align-items: center;
 `;
 
-const Grid = styled.div`
+const ProductGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
@@ -182,7 +184,7 @@ const combos: Combo[] = [
     id: 1,
     name: 'Combo Vía Láctea',
     description: 'Palomitas grandes + 2 Refrescos medianos + 1 Chocolate',
-    price: 12.99,
+    price: 8.99,
     image: '/img/lactea.jpg',
     quantity: 0,
     category: 'combo'
@@ -191,7 +193,7 @@ const combos: Combo[] = [
     id: 2,
     name: 'Combo Andrómeda',
     description: 'Palomitas jumbo + 2 Refrescos grandes + Nachos con queso',
-    price: 15.99,
+    price: 12.99,
     image: '/img/andromeda.jpg',
     quantity: 0,
     category: 'combo'
@@ -200,7 +202,7 @@ const combos: Combo[] = [
     id: 3,
     name: 'Combo Nebulosa Familiar',
     description: 'Palomitas jumbo + 4 Refrescos grandes + 2 Hot Dogs + Tequeños',
-    price: 24.99,
+    price: 19.99,
     image: '/img/nebula.jpg',
     quantity: 0,
     category: 'combo'
@@ -209,7 +211,7 @@ const combos: Combo[] = [
     id: 4,
     name: 'Combo Constelación Romántica',
     description: 'Palomitas grandes en forma de corazón + 2 Refrescos medianos + Chocolate en forma de corazón + 2 Hot Dogs',
-    price: 18.99,
+    price: 15.99,
     image: '/img/cleo.jpeg',
     quantity: 0,
     category: 'combo'
@@ -221,7 +223,7 @@ const drinks: Product[] = [
     id: 101,
     name: 'Pepsi Orbital',
     description: 'Refresco Pepsi',
-    price: 3.99,
+    price: 2.99,
     image: '/img/pepsi.png',
     size: 'M',
     category: 'drinks',
@@ -264,7 +266,7 @@ const snacks: Product[] = [
     id: 201,
     name: 'Tequeños Meteoro',
     description: 'Pack de 6 tequeños con salsa',
-    price: 5.99,
+    price: 4.99,
     image: '/img/tequenos.jpg',
     category: 'snacks',
     quantity: 0
@@ -303,7 +305,7 @@ const popcorn: Product[] = [
     id: 301,
     name: 'Palomitas Polvo Estelar',
     description: 'Palomitas de maíz con mantequilla',
-    price: 4.99,
+    price: 3.99,
     image: '/img/polvo.jpg',
     size: 'S',
     category: 'popcorn',
@@ -342,6 +344,23 @@ const popcorn: Product[] = [
 ];
 
 const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, showOnlyInBooking }) => {
+  const { 
+    popcornSmallUSD,
+    popcornMediumUSD,
+    popcornLargeUSD,
+    sodaSmallUSD,
+    sodaMediumUSD,
+    sodaLargeUSD,
+    hotDogUSD,
+    nachosUSD,
+    smallComboUSD,
+    mediumComboUSD,
+    largeComboUSD,
+    formatUSD,
+    formatPrice,
+    isLoading
+  } = usePrices();
+
   const [selectedCombos, setSelectedCombos] = useState<Combo[]>(combos.map(combo => ({ ...combo, quantity: 0 })));
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([
     ...drinks.map(drink => ({ ...drink, quantity: 0 })),
@@ -407,39 +426,48 @@ const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, sho
   const renderProductSection = (title: string, products: Product[], isCombo: boolean = false) => (
     <>
       <SectionTitle currentTheme={mode}>{title}</SectionTitle>
-      <Grid>
+      <MuiGrid container spacing={2}>
         {products.map((product) => (
-          <ProductCard key={product.id} isSelected={(product.quantity || 0) > 0}>
-            <ProductImage src={product.image} alt={product.name} />
-            <ProductName>{product.name}</ProductName>
-            <ProductDescription>{product.description}</ProductDescription>
-            {product.size && <ProductSize>Tamaño: {product.size}</ProductSize>}
-            <ProductPrice>
-              <span>${product.price.toFixed(2)}</span>
-              <BsPrice>{formatBsPrice(product.price)}</BsPrice>
-            </ProductPrice>
-            <QuantityControl>
-              <QuantityButton
-                onClick={() => handleQuantityChange(product.id, false, isCombo)}
-                disabled={(product.quantity || 0) === 0}
-              >
-                -
-              </QuantityButton>
-              <QuantityText>{product.quantity || 0}</QuantityText>
-              <QuantityButton
-                onClick={() => handleQuantityChange(product.id, true, isCombo)}
-              >
-                +
-              </QuantityButton>
-            </QuantityControl>
-            {(product.quantity || 0) > 0 && (
-              <SelectedBadge>
-                <span>✓</span> {(product.quantity || 0)} {(product.quantity || 0) === 1 ? 'seleccionado' : 'seleccionados'}
-              </SelectedBadge>
-            )}
-          </ProductCard>
+          <MuiGrid item xs={12} sm={6} md={4} key={product.id}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">{product.name}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {product.description}
+                </Typography>
+                <Typography variant="h6" sx={{ mt: 2 }}>
+                  {isLoading ? (
+                    "Cargando precio..."
+                  ) : (
+                    <>
+                      {formatUSD(product.price)}
+                    </>
+                  )}
+                </Typography>
+                <QuantityControl>
+                  <QuantityButton
+                    onClick={() => handleQuantityChange(product.id, false, isCombo)}
+                    disabled={(product.quantity || 0) === 0}
+                  >
+                    <Remove />
+                  </QuantityButton>
+                  <QuantityText>{product.quantity || 0}</QuantityText>
+                  <QuantityButton
+                    onClick={() => handleQuantityChange(product.id, true, isCombo)}
+                  >
+                    <Add />
+                  </QuantityButton>
+                </QuantityControl>
+                {(product.quantity || 0) > 0 && (
+                  <SelectedBadge>
+                    <span>✓</span> {(product.quantity || 0)} {(product.quantity || 0) === 1 ? 'seleccionado' : 'seleccionados'}
+                  </SelectedBadge>
+                )}
+              </CardContent>
+            </Card>
+          </MuiGrid>
         ))}
-      </Grid>
+      </MuiGrid>
     </>
   );
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -10,6 +10,9 @@ import BookingSystem from './BookingSystem';
 import SnackBarMenu, { Combo } from './SnackBar';
 import RoomSelection from './RoomSelection';
 import { rooms } from './shared/RoomTypes';
+import { usePrices } from '../contexts/PriceContext';
+import { Box, Typography, Grid, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Login } from '@mui/icons-material';
 
 interface Seat {
   id: number;
@@ -19,6 +22,13 @@ interface Seat {
   isSelected: boolean;
   isHandicap?: boolean;
   isReclinable?: boolean;
+}
+
+interface TicketSelection {
+  regular: number;
+  vip: number;
+  child: number;
+  senior: number;
 }
 
 const steps = [
@@ -164,6 +174,17 @@ const TotalPrice = styled.div`
   text-align: right;
 `;
 
+const BASE_PRICE = 2.00; // Precio base para todas las películas
+
+const roomPrices = {
+  'sala-standard-1': { name: 'Sala Standard', price: BASE_PRICE },
+  'sala-3d': { name: 'Sala 3D', price: BASE_PRICE + 2 },
+  'sala-4dx': { name: 'Sala 4DX', price: BASE_PRICE + 5 },
+  'sala-screenx': { name: 'Sala ScreenX', price: BASE_PRICE + 3 },
+  'sala-vip': { name: 'Sala VIP', price: BASE_PRICE + 4 },
+  'sala-imax': { name: 'Sala IMAX', price: BASE_PRICE + 4.5 }
+};
+
 const PurchaseFlow: React.FC<PurchaseFlowProps> = ({ 
   mode, 
   movieId, 
@@ -177,7 +198,29 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
   const [activeStep, setActiveStep] = useState(0);
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [selectedCombos, setSelectedCombos] = useState<Combo[]>([]);
+  const [selectedTickets, setSelectedTickets] = useState<TicketSelection>({
+    regular: 0,
+    vip: 0,
+    child: 0,
+    senior: 0
+  });
   const navigate = useNavigate();
+  const { 
+    regularTicketUSD,
+    vipTicketUSD,
+    childTicketUSD,
+    seniorTicketUSD,
+    formatUSD,
+    formatPrice,
+    isLoading 
+  } = usePrices();
+
+  // Si no está autenticado, redirigir al componente padre
+  useEffect(() => {
+    if (!isLoggedIn) {
+      onBack();
+    }
+  }, [isLoggedIn, onBack]);
 
   const handleNext = () => {
     if (activeStep === 0 && selectedSeats.length === 0) {
@@ -187,7 +230,7 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
 
     if (activeStep === steps.length - 1) {
       // Calcular el precio total
-      const selectedRoomData = rooms[selectedRoom];
+      const selectedRoomData = roomPrices[selectedRoom];
       const ticketPrice = parseFloat(selectedRoomData.price.replace('$', ''));
       const ticketsTotal = ticketPrice * selectedSeats.length;
       const combosTotal = selectedCombos.reduce((total, combo) => total + (combo.price * combo.quantity), 0);
@@ -220,21 +263,60 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
     setActiveStep((prevStep) => prevStep + 1);
   };
 
-  const handleBack = () => {
-    if (activeStep === 0 && onBack) {
-      onBack();
-      return;
-    }
-    setActiveStep((prevStep) => prevStep - 1);
-  };
-
   const handleSeatsSelected = (seats: Seat[]) => {
     setSelectedSeats(seats);
+    // Actualizar los tickets seleccionados basado en los asientos
+    setSelectedTickets({
+      regular: seats.filter(seat => !seat.isReclinable && !seat.isHandicap).length,
+      vip: seats.filter(seat => seat.isReclinable).length,
+      child: 0, // Se actualizará cuando el usuario especifique
+      senior: seats.filter(seat => seat.isHandicap).length
+    });
   };
 
   const handleCombosSelected = (combos: Combo[]) => {
     setSelectedCombos(combos);
   };
+
+  const calculateTotal = (tickets: TicketSelection) => {
+    const roomPrice = Number(roomPrices[selectedRoom]?.price || BASE_PRICE);
+    return (
+      tickets.regular * (roomPrice + Number(regularTicketUSD)) +
+      tickets.vip * (roomPrice + Number(vipTicketUSD)) +
+      tickets.child * (roomPrice + Number(childTicketUSD)) +
+      tickets.senior * (roomPrice + Number(seniorTicketUSD))
+    );
+  };
+
+  const renderTicketPrices = () => (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle1" gutterBottom>
+        Precios por tipo de entrada:
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={6} sm={3}>
+          <Typography variant="body2">
+            Regular: {isLoading ? "Cargando..." : formatUSD(regularTicketUSD)}
+          </Typography>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <Typography variant="body2">
+            VIP: {isLoading ? "Cargando..." : formatUSD(vipTicketUSD)}
+          </Typography>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <Typography variant="body2">
+            Niños: {isLoading ? "Cargando..." : formatUSD(childTicketUSD)}
+          </Typography>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <Typography variant="body2">
+            Tercera Edad: {isLoading ? "Cargando..." : formatUSD(seniorTicketUSD)}
+          </Typography>
+        </Grid>
+      </Grid>
+    </Box>
+  );
 
   const getStepContent = (step: number) => {
     switch (step) {
@@ -243,7 +325,7 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
           <>
             <Title currentTheme={mode}>Selección de Asientos - {movieTitle}</Title>
             <Subtitle currentTheme={mode}>
-              Sala: {rooms[selectedRoom].name} - Horario: {selectedTime}
+              Sala: {roomPrices[selectedRoom].name} - Horario: {selectedTime}
             </Subtitle>
             <BookingSystem 
               mode={mode} 
@@ -267,7 +349,7 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
           </>
         );
       case 2:
-        const selectedRoomData = rooms[selectedRoom];
+        const selectedRoomData = roomPrices[selectedRoom];
         const ticketPrice = parseFloat(selectedRoomData.price.replace('$', ''));
         const ticketsTotal = ticketPrice * selectedSeats.length;
         const combosTotal = selectedCombos.reduce((total, combo) => total + (combo.price * combo.quantity), 0);
@@ -335,7 +417,7 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
       {getStepContent(activeStep)}
 
       <ButtonContainer>
-        <NavigationButton onClick={handleBack}>
+        <NavigationButton onClick={() => setActiveStep((prevStep) => prevStep - 1)}>
           {activeStep === 0 ? 'VOLVER A DETALLES' : 'ANTERIOR'}
         </NavigationButton>
         <NavigationButton
@@ -346,6 +428,15 @@ const PurchaseFlow: React.FC<PurchaseFlowProps> = ({
           {activeStep === steps.length - 1 ? 'PROCEDER AL PAGO' : 'SIGUIENTE'}
         </NavigationButton>
       </ButtonContainer>
+
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="h6">
+          Total: {isLoading ? "Calculando..." : formatUSD(calculateTotal(selectedTickets))}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {isLoading ? "" : `(${formatPrice(calculateTotal(selectedTickets))} VEF)`}
+        </Typography>
+      </Box>
     </MainContent>
   );
 };
