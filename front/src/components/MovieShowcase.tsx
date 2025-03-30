@@ -27,26 +27,25 @@ const getRandomColor = () => {
 
 const movies: Movie[] = [
   // TOP 5
-  { id: '4', title: 'BLANCANIEVES', imageUrl: getRandomColor(), isTop: true },
-  { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl: getRandomColor(), isTop: true },
-  { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl: getRandomColor(), isTop: true },
-  { id: '5', title: 'CODIGO NEGRO', imageUrl: getRandomColor(), isTop: true },
-  { id: '11', title: 'FLOW', imageUrl: getRandomColor(), isTop: true },
+  { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true },
+  { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl:'/img/capitan.jpg', isTop: true },
+  { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl:'/img/titan.jpg', isTop: true },
+  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true },
+  { id: '11', title: 'FLOW', imageUrl:'/img/flow.jpg', isTop: true },
   // Cartelera Regular
-  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl: getRandomColor() },
-  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl: getRandomColor() },
-  { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl: getRandomColor() },
-  { id: '7', title: 'FRIO', imageUrl: getRandomColor() },
-  { id: '8', title: 'EL GUARDIAN DE LA MAGIA', imageUrl: getRandomColor() },
-  { id: '9', title: 'NOVOCAINE', imageUrl: getRandomColor() },
-  { id: '10', title: 'MICKEY 17', imageUrl: getRandomColor() },
-  { id: '12', title: 'EL MONO', imageUrl: getRandomColor() },
-  { id: '13', title: 'OPERACION PANDA', imageUrl: getRandomColor() },
-  { id: '15', title: 'AUN ESTOY AQUI', imageUrl: getRandomColor() },
-  { id: '16', title: 'EL BRUTALISTA', imageUrl: getRandomColor() },
-  { id: '17', title: 'ANORA', imageUrl: getRandomColor() },
-  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl: getRandomColor() },
-  { id: '19', title: 'MUFASA EL REY LEON', imageUrl: getRandomColor() }
+  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg' },
+  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg' },
+  { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl:'/img/bruja.jpg' },
+  { id: '8', title: 'ARGYLLE', imageUrl:'/img/argylle.jpg' },
+  { id: '9', title: 'NOVOCAINE', imageUrl:'/img/novocaide.jpg' },
+  { id: '10', title: 'MICKEY 17', imageUrl:'/img/my17.jpg' },
+  { id: '12', title: 'EL MONO', imageUrl:'/img/elmono.jpg' },
+  { id: '13', title: 'OPERACION PANDA', imageUrl:'/img/oppanda.jpg' },
+  { id: '15', title: 'AUN ESTOY AQUI', imageUrl:'/img/aun.jpg' },
+  { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/brutalista.jpg' },
+  { id: '17', title: 'ANORA', imageUrl:'/img/anora.jpg' },
+  { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/soc3.jpg' },
+
 ];
 
 const ShowcaseContainer = styled(Box)(({ theme }) => ({
@@ -108,10 +107,32 @@ const MovieCard = styled(Box)(({ theme }) => ({
   },
 }));
 
-const MoviePlaceholder = styled(Box)<{ bgcolor: string }>(({ bgcolor }) => ({
+// const MoviePlaceholder = styled(Box)<{ bgcolor: string }>(({ bgcolor }) => ({
+//   width: '100%',
+//   height: '400px',
+//   backgroundColor: bgcolor,
+//   display: 'flex',
+//   alignItems: 'center',
+//   justifyContent: 'center',
+//   position: 'relative',
+//   overflow: 'hidden',
+//   '&::after': {
+//     content: '""',
+//     position: 'absolute',
+//     top: 0,
+//     left: 0,
+//     right: 0,
+//     bottom: 0,
+//     background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+//   }
+// }));
+
+const MoviePlaceholder = styled(Box)<{ imageUrl: string }>(({ imageUrl }) => ({
   width: '100%',
   height: '400px',
-  backgroundColor: bgcolor,
+  backgroundImage: `url(${imageUrl})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -124,7 +145,7 @@ const MoviePlaceholder = styled(Box)<{ bgcolor: string }>(({ bgcolor }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+    background: 'linear-gradient(45deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
   }
 }));
 
@@ -164,7 +185,7 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
       {movies.map((movie) => (
         <Grid item xs={12} sm={6} md={12/columns} key={movie.id}>
           <MovieCard>
-            <MoviePlaceholder bgcolor={movie.imageUrl}>
+            <MoviePlaceholder imageUrl={movie.imageUrl}>
               <Typography
                 variant="h6"
                 sx={{
@@ -178,7 +199,7 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
                   zIndex: 1,
                 }}
               >
-                {movie.title}
+                
               </Typography>
             </MoviePlaceholder>
             <MovieInfo>

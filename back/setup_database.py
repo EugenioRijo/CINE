@@ -34,16 +34,16 @@ def create_database():
             # Crear todas las tablas
             create_tables_queries = [
                 """
-                CREATE TABLE clientes (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    nombre VARCHAR(100) NOT NULL,
-                    email VARCHAR(120) UNIQUE,
-                    password VARCHAR(20) NOT NULL,  
-                    telefono VARCHAR(20),
-                    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    es_miembro TINYINT(1) DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            CREATE TABLE clientes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                email VARCHAR(120) UNIQUE NOT NULL,  -- ✅ NOT NULL añadido
+                password VARCHAR(200) NOT NULL,      -- ✅ Longitud corregida
+                telefono VARCHAR(20),
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- ✅ Tipo cambiado
+                es_miembro TINYINT(1) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;  -- ✅ Collation
                 """,
                 
                 """
@@ -186,6 +186,30 @@ def create_database():
             for query in index_queries:
                 cursor.execute(query)
                 print("🔑 Índice creado exitosamente")
+            
+
+             # Insertar cliente Admin si no existe
+            insert_admin_query = """
+            INSERT IGNORE INTO clientes (
+                nombre, 
+                email, 
+                password, 
+                telefono, 
+                fecha_registro, 
+                es_miembro, 
+                created_at
+            ) VALUES (
+                'Admin',
+                'planetcinemavzla@gmail.com',
+                'scrypt:32768:8:1$UhVt5z4HM6w1gc9F$15a6d74fbc9838e76836f7e7f99d6a575ee0cb59db75452ce5c5b3cce294c1d3afeb70a2a74cfee37576a3eec21bf9863b8eba153e43062b0d5ed95080345bfb',
+                '',
+                '2025-03-29 20:06:42',
+                1,
+                '2025-03-29 20:06:42'
+            )
+            """
+            cursor.execute(insert_admin_query)
+            print("👤 Cliente Admin insertado o ya existente (IGNORE)")
             
             connection.commit()
             

@@ -46,6 +46,7 @@ const MovieImage = styled(Box)(({ theme }) => ({
     ? '0 8px 32px rgba(0,0,0,0.5)'
     : '0 8px 32px rgba(0,0,0,0.1)',
   position: 'relative',
+  backgroundRepeat: 'no-repeat',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -160,7 +161,7 @@ interface Movie {
 const moviesData: Record<string, Movie> = {
   '4': {
     title: 'BLANCANIEVES',
-    imageUrl: 'https://i.imgur.com/YQjqVbE.jpg',
+    imageUrl: '/img/blanca.jpg',
     description: 'Una nueva versión del clásico cuento de hadas que sigue a una joven princesa que debe enfrentarse a su malvada madrastra en un mundo lleno de magia y peligros.',
     duration: '1h 55min',
     genre: ['Fantasía', 'Aventura', 'Drama'],
@@ -168,11 +169,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://www.youtube.com/embed/qEuqmrYLRkI',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
   },
   '14': {
     title: 'CAPITAN AMERICA UN NUEVO MUNDO',
-    imageUrl: 'https://i.imgur.com/8XKvMvS.jpg',
+    imageUrl: '/img/capitan.jpg',
     description: 'El Capitán América regresa en una nueva aventura épica donde deberá enfrentarse a una amenaza global que podría cambiar el mundo tal como lo conocemos.',
     duration: '2h 15min',
     genre: ['Acción', 'Aventura', 'Ciencia Ficción'],
@@ -180,11 +181,11 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['1:00 PM', '4:00 PM', '7:00 PM', '10:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://www.youtube.com/embed/AjLTXrL6O44',
+    trailerUrl: 'https://youtu.be/i0zaDSsk08w?si=BcYvxphzKM4W6iTT',
   },
   '3': {
     title: 'ATTACK ON TITAN EL ATAQUE FINAL',
-    imageUrl: 'https://i.imgur.com/JZj7BgF.jpg',
+    imageUrl: '/img/titan.jpg',
     description: 'La batalla final por la humanidad comienza. Eren y sus compañeros se enfrentan a su destino en esta épica conclusión de la saga Attack on Titan.',
     duration: '2h 30min',
     genre: ['Anime', 'Acción', 'Fantasía'],
@@ -192,11 +193,11 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['3:00 PM', '6:00 PM', '9:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://www.youtube.com/embed/r7MosyoAUhQ',
+    trailerUrl: 'https://youtu.be/3xNH23QkNpk?si=25yhurAbRYs3wGqA',
   },
   '5': {
     title: 'CODIGO NEGRO',
-    imageUrl: 'https://i.imgur.com/Q9YZj8L.jpg',
+    imageUrl: '/img/codigonegro.jpg',
     description: 'Un thriller de espionaje donde un agente secreto debe descubrir una conspiración internacional antes de que sea demasiado tarde.',
     duration: '2h 10min',
     genre: ['Thriller', 'Acción', 'Suspense'],
@@ -204,10 +205,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/1QdSlGXn72M?si=9FEkCNtwhMUa4r6d'
   },
   '11': {
     title: 'FLOW',
-    imageUrl: 'https://i.imgur.com/nKZKqGx.jpg',
+    imageUrl: '/img/flow.jpg',
     description: 'Una historia inspiradora sobre un joven bailarín que debe superar sus miedos y prejuicios para alcanzar sus sueños en el mundo de la danza urbana.',
     duration: '1h 45min',
     genre: ['Drama', 'Música', 'Danza'],
@@ -215,10 +217,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:30 PM', '6:00 PM', '8:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/izIuFUnZkjA?si=FKejhIgvD1Ip3Nj2'
   },
   '1': {
     title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR',
-    imageUrl: 'https://i.imgur.com/L2XYpDn.jpg',
+    imageUrl: '/img/miku.jpg',
     description: 'Hatsune Miku se enfrenta a un desafío único cuando pierde su capacidad para cantar. Una aventura musical llena de emociones y melodías inolvidables.',
     duration: '1h 40min',
     genre: ['Anime', 'Música', 'Fantasía'],
@@ -226,10 +229,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/RZHkQe5ThQQ?si=YTUVoqojsnbzaRbX'
   },
   '2': {
     title: 'UNA PELICULA DE MINECRAFT',
-    imageUrl: 'https://i.imgur.com/wYvqXby.jpg',
+    imageUrl: '/img/minecraft.jpg',
     description: 'Adéntrate en el mundo de bloques más famoso en una aventura épica llena de creatividad, peligros y diversión para toda la familia.',
     duration: '1h 50min',
     genre: ['Animación', 'Aventura', 'Familia'],
@@ -237,10 +241,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['1:30 PM', '4:00 PM', '6:30 PM', '9:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/yxrjSE8XddA?si=PiE5CpMR4beGvSLs'
   },
   '6': {
     title: 'CONJURO DE LA BRUJA',
-    imageUrl: 'https://i.imgur.com/H7ZkxQR.jpg',
+    imageUrl: '/img/bruja.jpg',
     description: 'Una aterradora historia de terror sobre una antigua maldición que despierta en un pueblo moderno, desatando el caos y el terror.',
     duration: '1h 58min',
     genre: ['Terror', 'Suspense', 'Sobrenatural'],
@@ -248,10 +253,12 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['4:00 PM', '6:30 PM', '9:00 PM', '11:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/4wIoIzcVFYw?si=FXvdJk_6_XN2ESAO'
+
   },
   '7': {
-    title: 'FRIO',
-    imageUrl: 'https://i.imgur.com/pKYtZ8M.jpg',
+    title: 'ARGYLLE',
+    imageUrl: '/img/argylle.jpg',
     description: 'Un grupo de supervivientes debe enfrentarse a una tormenta mortal y temperaturas extremas en esta intensa película de supervivencia.',
     duration: '2h 05min',
     genre: ['Thriller', 'Supervivencia', 'Drama'],
@@ -259,10 +266,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:00 PM', '5:30 PM', '8:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/vTA_MQzWz3w?si=jOCGznqynaXhL1Sx'
   },
   '8': {
-    title: 'EL GUARDIAN DE LA MAGIA',
-    imageUrl: 'https://i.imgur.com/VNf7JWx.jpg',
+    title: 'ARGYLLE',
+    imageUrl: '/img/argylle.jpg',
     description: 'Un joven aprendiz de mago debe proteger un antiguo artefacto mágico de fuerzas oscuras que amenazan con destruir el equilibrio del mundo.',
     duration: '2h 00min',
     genre: ['Fantasía', 'Aventura', 'Familia'],
@@ -270,10 +278,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/vTA_MQzWz3w?si=jOCGznqynaXhL1Sx'
   },
   '9': {
     title: 'NOVOCAINE',
-    imageUrl: 'https://i.imgur.com/dRj4hGZ.jpg',
+    imageUrl: '/img/novocaide.jpg',
     description: 'Un thriller psicológico que sigue a un dentista cuya vida da un giro oscuro cuando se ve envuelto en una conspiración criminal.',
     duration: '1h 55min',
     genre: ['Thriller', 'Drama', 'Crimen'],
@@ -281,10 +290,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/pMfULWLqifI?si=PRtr1rcuDrYUib2l'
   },
   '10': {
     title: 'MICKEY 17',
-    imageUrl: 'https://i.imgur.com/K9XZnhY.jpg',
+    imageUrl: '/img/my17.jpg',
     description: 'En un futuro distópico, un clon debe enfrentarse a su propia identidad y destino mientras explora los límites de la humanidad y la tecnología.',
     duration: '2h 20min',
     genre: ['Ciencia Ficción', 'Drama', 'Thriller'],
@@ -292,10 +302,11 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/hjS-RGoif1Q?si=-MdPs--y9z68X5FZ'
   },
   '12': {
     title: 'EL MONO',
-    imageUrl: 'https://i.imgur.com/mP8QZtJ.jpg',
+    imageUrl: '/img/elmono.jpg',
     description: 'Una historia conmovedora sobre la relación entre un investigador y un primate extraordinario que desafía nuestra comprensión de la inteligencia animal.',
     duration: '1h 45min',
     genre: ['Drama', 'Aventura', 'Ciencia'],
@@ -303,10 +314,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:00 PM', '5:30 PM', '8:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/hOzVJSGSGXA?si=WRm6XID5-kjKCAC2'
   },
   '13': {
     title: 'OPERACION PANDA',
-    imageUrl: 'https://i.imgur.com/NqWzxYL.jpg',
+    imageUrl: '/img/oppanda.jpg',
     description: 'Una divertida aventura animada donde un grupo de pandas debe embarcarse en una misión secreta para salvar su hogar en la selva.',
     duration: '1h 35min',
     genre: ['Animación', 'Comedia', 'Familia'],
@@ -314,10 +326,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['1:00 PM', '3:30 PM', '6:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/QDkotU-lpeM?si=Jv4dyXklnsyIaZ_V'
   },
   '15': {
     title: 'AUN ESTOY AQUI',
-    imageUrl: 'https://i.imgur.com/Lw9h4Y5.jpg',
+    imageUrl: '/img/aun.jpg',
     description: 'Un conmovedor drama sobrenatural sobre el amor que trasciende la muerte y los lazos que nos mantienen conectados más allá de la vida.',
     duration: '2h 00min',
     genre: ['Drama', 'Romance', 'Sobrenatural'],
@@ -325,10 +338,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/LDwVOHbJByk?si=wMOwb08BrGaos_9M'
   },
   '16': {
     title: 'EL BRUTALISTA',
-    imageUrl: 'https://i.imgur.com/XcRf2Yp.jpg',
+    imageUrl: '/img/brutalista.jpg',
     description: 'La historia de un arquitecto visionario que debe enfrentarse a sus propios demonios mientras construye su obra maestra en un mundo que no lo comprende.',
     duration: '2h 15min',
     genre: ['Drama', 'Biografía', 'Arte'],
@@ -336,10 +350,11 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:30 PM', '6:00 PM', '8:30 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/vna5bN96xJg?si=Bx0CpjNR8TmN4qra'
   },
   '17': {
     title: 'ANORA',
-    imageUrl: 'https://i.imgur.com/P8ZkQmY.jpg',
+    imageUrl: '/img/anora.jpg',
     description: 'En un mundo fantástico, una joven guerrera debe descubrir sus poderes ocultos para salvar su reino de una antigua maldición.',
     duration: '2h 10min',
     genre: ['Fantasía', 'Aventura', 'Acción'],
@@ -347,10 +362,11 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/M25Dqnr6JYE?si=APuNdLojvMVhDuLf'
   },
   '18': {
     title: 'SONIC 3 LA PELICULA',
-    imageUrl: 'https://i.imgur.com/T9ZkLxY.jpg',
+    imageUrl: '/img/soc3.jpg',
     description: 'Sonic regresa en una nueva aventura a toda velocidad donde deberá enfrentarse a su mayor desafío hasta ahora para salvar tanto su mundo como el nuestro.',
     duration: '1h 55min',
     genre: ['Acción', 'Aventura', 'Familia'],
@@ -358,10 +374,11 @@ const moviesData: Record<string, Movie> = {
     price: 9.99,
     schedule: ['1:30 PM', '4:00 PM', '6:30 PM', '9:00 PM'],
     releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/ySkQCd7UOhk?si=k7Ir8YEbx8fhYoQE'
   },
   '19': {
     title: 'MUFASA EL REY LEON',
-    imageUrl: 'https://i.imgur.com/RQZkM8L.jpg',
+    imageUrl: '/img/RQZkM8L.jpg',
     description: 'Descubre la historia jamás contada del padre de Simba en esta emocionante precuela que explora los orígenes de uno de los reyes más legendarios de la sabana.',
     duration: '2h 00min',
     genre: ['Animación', 'Aventura', 'Drama'],
@@ -536,7 +553,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
             <MovieImage
               sx={{
                 backgroundImage: `url(${movie.imageUrl})`,
-                backgroundSize: 'cover',
+                backgroundSize: 'contain',
                 backgroundPosition: 'center',
                 height: '400px',
               }}
@@ -570,7 +587,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
                   <iframe
                     width="100%"
                     height="100%"
-                    src={movie.trailerUrl}
+                    // src={movie.trailerUrl}
+                    src={movie.trailerUrl.replace('youtu.be/', 'www.youtube.com/embed/').split('?')[0] + '?autoplay=1&rel=0&modestbranding=1'}
                     title={`${movie.title} Trailer`}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

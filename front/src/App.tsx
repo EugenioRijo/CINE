@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import {
   BrowserRouter,
   Routes,
   Route,
-  useNavigate
+  useNavigate,
+  useLocation
 } from 'react-router-dom';
 import WelcomePage from './components/WelcomePage';
 import MovieShowcase from './components/MovieShowcase';
@@ -16,6 +17,21 @@ import Payment from './components/Payment';
 import MovieDetails from './components/MovieDetails';
 import ContactForm from './components/ContactForm';
 import Events from './components/Events';
+import { AuthProvider } from './components/AuthContext';
+import AdminStats from './components/AdminStats';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [pathname]);
+
+  return null;
+}
 
 const AppContent = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -51,7 +67,7 @@ const AppContent = () => {
     },
   });
 
-  const handleModeChange = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleModeChange = () => {
     setIsDarkMode((prevMode) => !prevMode);
   };
 
@@ -63,10 +79,17 @@ const AppContent = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <ScrollToTop />
         <Routes>
           <Route
             path="/"
-            element={<WelcomePage mode={isDarkMode ? 'dark' : 'light'} onStartJourney={handleStartJourney} onModeChange={handleModeChange} />}
+            element={
+              <WelcomePage 
+                mode={isDarkMode ? 'dark' : 'light'} 
+                onStartJourney={handleStartJourney} 
+                onModeChange={handleModeChange} 
+              />
+            }
           />
           <Route
             path="/cartelera"
@@ -100,9 +123,13 @@ const AppContent = () => {
             path="*"
             element={<NotFound mode={isDarkMode ? 'dark' : 'light'} />}
           />
+          <Route
+              path="/admin/estadisticas"
+              element={<AdminStats mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange}/>}
+            />
         </Routes>
+        <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
       </Box>
-      <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
     </ThemeProvider>
   );
 };
@@ -110,7 +137,9 @@ const AppContent = () => {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   );
-} 
+}

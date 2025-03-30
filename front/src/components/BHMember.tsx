@@ -25,8 +25,6 @@ import {
   EventSeat,
   ThumbUp,
   AccessTime,
-  Brightness4,
-  Brightness7,
   Rocket,
   Diamond,
   AttachMoney,
@@ -244,11 +242,6 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
       zIndex: 9999
     }}>
       <RocketBackButton mode={mode} />
-      <Box sx={{ position: 'fixed', right: '20px', top: '20px', zIndex: 10000 }}>
-        <IconButton onClick={onModeChange} sx={{ color: '#FFD700' }}>
-          {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-        </IconButton>
-      </Box>
       <StyledContainer>
         <ContentWrapper>
           <FloatingIcon>
@@ -264,7 +257,7 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
                 fontSize: { xs: '3rem', md: '5rem' },
               }}
             >
-              BLACK HOLE MEMBER
+              NOVA PRIME MEMBER
             </Typography>
           </FloatingIcon>
 
@@ -318,7 +311,32 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
                   $10.00/mes*
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: 'rgba(255,255,255,0.7)' }}>
-                  *Precio especial de lanzamiento. Puede subir más rápido que la inflación.
+                  *Precio especial de lanzamiento. Puedes subir más rápido que la inflación.
+                </Typography>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    mt: 3, 
+                    color: 'rgba(255,255,255,0.9)',
+                    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px dashed #FFD700'
+                  }}
+                >
+                  ¡30 películas con 50% de descuento!* 
+                  <Typography 
+                    component="span" 
+                    sx={{ 
+                      display: 'block', 
+                      fontSize: '0.8rem', 
+                      mt: 1,
+                      color: 'rgba(255,255,255,0.6)',
+                      fontStyle: 'italic'
+                    }}
+                  >
+                    *Porque sabemos que no tendrás tiempo de ver más de 2 al mes... ¡pero hey, la intención es lo que cuenta!
+                  </Typography>
                 </Typography>
                 <GoldButton
                   variant="contained"
@@ -343,7 +361,7 @@ const BHMember: React.FC<BHMemberProps> = ({ mode, onModeChange }) => {
               color: 'rgba(255,255,255,0.7)',
             }}
           >
-            *Ningún agujero negro fue dañado en la creación de esta membresía
+            *Ningún agujero negro fue dañado en la creación de esta membresía. Los descuentos sí podrían dañar tu cartera si no los usas.
           </Typography>
         </ContentWrapper>
       </StyledContainer>

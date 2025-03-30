@@ -93,8 +93,8 @@ const ProductCard = styled.div<{ isSelected: boolean }>`
 `;
 
 const ProductImage = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 200px;
+  height: 200px;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -107,13 +107,13 @@ const ProductName = styled.h3`
 `;
 
 const ProductDescription = styled.p`
-  color: #666;
+  color: #000;
   margin: 0.5rem 0;
   font-size: 0.9rem;
 `;
 
 const ProductPrice = styled.div`
-  color: #41E1E1;
+  color:rgb(16, 129, 129);
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0.5rem 0;
@@ -125,7 +125,7 @@ const ProductPrice = styled.div`
 
 const BsPrice = styled.span`
   font-size: 1rem;
-  color: #666;
+  color: #555;
 `;
 
 const QuantityText = muiStyled(Typography)<{ theme?: Theme }>(({ theme }) => ({
@@ -134,7 +134,7 @@ const QuantityText = muiStyled(Typography)<{ theme?: Theme }>(({ theme }) => ({
   margin: '0 1rem',
   minWidth: '30px',
   textAlign: 'center',
-  color: theme?.palette.mode === 'dark' ? '#fff' : '#000',
+  color: '#000',
 }));
 
 const QuantityButton = muiStyled(Button)<{ theme?: Theme }>(({ theme }) => ({
@@ -183,7 +183,7 @@ const combos: Combo[] = [
     name: 'Combo Vía Láctea',
     description: 'Palomitas grandes + 2 Refrescos medianos + 1 Chocolate',
     price: 12.99,
-    image: '/images/combo1.jpg',
+    image: '/img/lactea.jpg',
     quantity: 0,
     category: 'combo'
   },
@@ -192,7 +192,7 @@ const combos: Combo[] = [
     name: 'Combo Andrómeda',
     description: 'Palomitas jumbo + 2 Refrescos grandes + Nachos con queso',
     price: 15.99,
-    image: '/images/combo2.jpg',
+    image: '/img/andromeda.jpg',
     quantity: 0,
     category: 'combo'
   },
@@ -201,16 +201,16 @@ const combos: Combo[] = [
     name: 'Combo Nebulosa Familiar',
     description: 'Palomitas jumbo + 4 Refrescos grandes + 2 Hot Dogs + Tequeños',
     price: 24.99,
-    image: '/images/combo3.jpg',
+    image: '/img/nebula.jpg',
     quantity: 0,
     category: 'combo'
   },
   {
     id: 4,
-    name: 'Combo Cleopatra & Marco Antonio',
+    name: 'Combo Constelación Romántica',
     description: 'Palomitas grandes en forma de corazón + 2 Refrescos medianos + Chocolate en forma de corazón + 2 Hot Dogs',
     price: 18.99,
-    image: '/images/combo-romance.jpg',
+    image: '/img/cleo.jpeg',
     quantity: 0,
     category: 'combo'
   }
@@ -222,7 +222,7 @@ const drinks: Product[] = [
     name: 'Pepsi Orbital',
     description: 'Refresco Pepsi',
     price: 3.99,
-    image: '/images/pepsi.jpg',
+    image: '/img/pepsi.png',
     size: 'M',
     category: 'drinks',
     quantity: 0
@@ -232,7 +232,7 @@ const drinks: Product[] = [
     name: 'Seven Up Estelar',
     description: 'Refresco Seven Up',
     price: 3.99,
-    image: '/images/7up.jpg',
+    image: '/img/7up.jpg',
     size: 'M',
     category: 'drinks',
     quantity: 0
@@ -242,7 +242,7 @@ const drinks: Product[] = [
     name: 'Malta Planetaria',
     description: 'Malta Regional',
     price: 3.99,
-    image: '/images/malta.jpg',
+    image: '/img/malta.jpeg',
     size: 'M',
     category: 'drinks',
     quantity: 0
@@ -252,7 +252,7 @@ const drinks: Product[] = [
     name: 'Hit Cósmico',
     description: 'Jugo Hit de Frutas',
     price: 3.99,
-    image: '/images/hit.jpg',
+    image: '/img/hit.jpg',
     size: 'M',
     category: 'drinks',
     quantity: 0
@@ -265,7 +265,7 @@ const snacks: Product[] = [
     name: 'Tequeños Meteoro',
     description: 'Pack de 6 tequeños con salsa',
     price: 5.99,
-    image: '/images/tequenos.jpg',
+    image: '/img/tequenos.jpg',
     category: 'snacks',
     quantity: 0
   },
@@ -274,7 +274,7 @@ const snacks: Product[] = [
     name: 'Nachos Constelación',
     description: 'Nachos con queso y guasacaca',
     price: 6.99,
-    image: '/images/nachos.jpg',
+    image: '/img/nachos.jpg',
     category: 'snacks',
     quantity: 0
   },
@@ -283,7 +283,7 @@ const snacks: Product[] = [
     name: 'Hot Dog Espacial',
     description: 'Hot dog con papitas y salsas',
     price: 5.99,
-    image: '/images/hotdog.jpg',
+    image: '/img/perrohot.jpg',
     category: 'snacks',
     quantity: 0
   },
@@ -292,7 +292,7 @@ const snacks: Product[] = [
     name: 'Empanadas Satélite',
     description: 'Empanadas de queso o carne',
     price: 4.99,
-    image: '/images/empanadas.jpg',
+    image: '/img/empanadas.jpg',
     category: 'snacks',
     quantity: 0
   }
@@ -304,7 +304,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Polvo Estelar',
     description: 'Palomitas de maíz con mantequilla',
     price: 4.99,
-    image: '/images/popcorn-small.jpg',
+    image: '/img/polvo.jpg',
     size: 'S',
     category: 'popcorn',
     quantity: 0
@@ -314,7 +314,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Cometa',
     description: 'Palomitas de maíz con mantequilla',
     price: 5.99,
-    image: '/images/popcorn-medium.jpg',
+    image: '/img/cometa.jpg',
     size: 'M',
     category: 'popcorn',
     quantity: 0
@@ -324,7 +324,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Supernova',
     description: 'Palomitas de maíz con mantequilla',
     price: 7.99,
-    image: '/images/popcorn-large.jpg',
+    image: '/img/nova.jpg',
     size: 'L',
     category: 'popcorn',
     quantity: 0
@@ -334,7 +334,7 @@ const popcorn: Product[] = [
     name: 'Palomitas Agujero Negro',
     description: 'Palomitas de maíz con caramelo',
     price: 8.99,
-    image: '/images/popcorn-caramel.jpg',
+    image: '/img/negro.png',
     size: 'L',
     category: 'popcorn',
     quantity: 0
@@ -461,7 +461,7 @@ const SectionTitle = styled.h2<ThemeProps>`
 `;
 
 const ProductSize = styled.div`
-  color: #666;
+  color: #555;
   font-size: 0.9rem;
   margin: 0.25rem 0;
 `;

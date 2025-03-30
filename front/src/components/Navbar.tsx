@@ -22,6 +22,7 @@ import {
   Star
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from './AuthContext'; // Importar el contexto
 
 interface NavbarProps {
   mode: 'dark' | 'light';
@@ -116,6 +117,7 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { user, logout } = useAuth(); // Usar el contexto
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -135,116 +137,132 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
   };
 
   return (
-    <>
-      <StyledAppBar position="fixed">
-        <StyledToolbar>
-          <LogoContainer onClick={handleLogoClick}>
-            <Logo
-              src="/planeta-cinema-logo.png"
-              alt="Planeta Cinema"
-              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                e.currentTarget.src = '/placeholder-logo.png';
-              }}
-            />
-            <Typography
-              variant="h6"
-              sx={{
-                color: mode === 'dark' ? '#fff' : '#000',
-                display: { xs: 'none', sm: 'block' },
-                fontWeight: 'bold',
-              }}
-            >
-              Planeta Cinema
-            </Typography>
-          </LogoContainer>
+    <StyledAppBar position="fixed">
+      <StyledToolbar>
+        <LogoContainer onClick={handleLogoClick}>
+          <Logo
+            src="/planeta-cinema-logo.png"
+            alt="Planeta Cinema"
+            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+              e.currentTarget.src = '/placeholder-logo.png';
+            }}
+          />
+          <Typography
+            variant="h6"
+            sx={{
+              color: mode === 'dark' ? '#fff' : '#000',
+              display: { xs: 'none', sm: 'block' },
+              fontWeight: 'bold',
+            }}
+          >
+            Planeta Cinema
+          </Typography>
+        </LogoContainer>
 
-          <Box sx={{ 
-            display: { xs: 'none', md: 'flex' }, 
-            alignItems: 'center',
-            gap: 1
-          }}>
+        <Box sx={{ 
+          display: { xs: 'none', md: 'flex' }, 
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <NavButton 
+            onClick={() => handleNavigation('/cartelera')}
+            startIcon={<Movie />}
+          >
+            Cartelera
+          </NavButton>
+          <NavButton 
+            onClick={() => handleNavigation('/eventos')}
+            startIcon={<Event />}
+          >
+            Eventos
+          </NavButton>
+          <NavButton 
+            onClick={() => handleNavigation('/contact')}
+            startIcon={<Info />}
+          >
+            Contáctanos
+          </NavButton>
+          
+          {user ? (
             <NavButton 
-              onClick={() => handleNavigation('/cartelera')}
-              startIcon={<Movie />}
+              onClick={logout}
+              startIcon={<Person />}
             >
-              Cartelera
+              Cerrar Sesión ({user.nombre})
             </NavButton>
-            <NavButton 
-              onClick={() => handleNavigation('/eventos')}
-              startIcon={<Event />}
-            >
-              Eventos
-            </NavButton>
-            <NavButton 
-              onClick={() => handleNavigation('/contact')}
-              startIcon={<Info />}
-            >
-              Contáctanos
-            </NavButton>
+          ) : (
             <NavButton 
               onClick={() => handleNavigation('/login')}
               startIcon={<Person />}
             >
               Iniciar Sesión
             </NavButton>
-            <BHMemberButton 
-              onClick={() => handleNavigation('/bh-member')}
-              startIcon={<Star />}
-            >
-              BH Member
-            </BHMemberButton>
-            <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
-              {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-            </ThemeToggle>
-          </Box>
+          )}
 
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="menu"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={() => handleNavigation('/cartelera')}>
-                <Movie sx={{ mr: 1 }} /> Cartelera
+          <BHMemberButton 
+            onClick={() => handleNavigation('/bh-member')}
+            startIcon={<Star />}
+          >
+            NP Member
+          </BHMemberButton>
+          <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
+            {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+          </ThemeToggle>
+        </Box>
+
+        <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+          <IconButton
+            size="large"
+            aria-label="menu"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            color="inherit"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={() => handleNavigation('/cartelera')}>
+              <Movie sx={{ mr: 1 }} /> Cartelera
+            </MenuItem>
+            <MenuItem onClick={() => handleNavigation('/eventos')}>
+              <Event sx={{ mr: 1 }} /> Eventos
+            </MenuItem>
+            <MenuItem onClick={() => handleNavigation('/contact')}>
+              <Info sx={{ mr: 1 }} /> Contáctanos
+            </MenuItem>
+            <MenuItem onClick={() => handleNavigation('/bh-member')}>
+              <Star sx={{ mr: 1 }} /> BH Member
+            </MenuItem>
+            
+            {user ? (
+              <MenuItem onClick={logout}>
+                <Person sx={{ mr: 1 }} /> Cerrar Sesión ({user.nombre})
               </MenuItem>
-              <MenuItem onClick={() => handleNavigation('/eventos')}>
-                <Event sx={{ mr: 1 }} /> Eventos
-              </MenuItem>
-              <MenuItem onClick={() => handleNavigation('/contact')}>
-                <Info sx={{ mr: 1 }} /> Contáctanos
-              </MenuItem>
+            ) : (
               <MenuItem onClick={() => handleNavigation('/login')}>
                 <Person sx={{ mr: 1 }} /> Iniciar Sesión
               </MenuItem>
-              <MenuItem onClick={() => handleNavigation('/bh-member')}>
-                <Star sx={{ mr: 1 }} /> BH Member
-              </MenuItem>
-            </Menu>
-          </Box>
-        </StyledToolbar>
-      </StyledAppBar>
-    </>
+            )}
+          </Menu>
+        </Box>
+      </StyledToolbar>
+    </StyledAppBar>
   );
 };
 
-export default Navbar; 
+export default Navbar;
