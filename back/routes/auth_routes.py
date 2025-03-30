@@ -1,6 +1,5 @@
 """
-Rutas de autenticación mejoradas
-Incluye seguridad reforzada, validaciones y mejores prácticas
+Rutas de autenticación mejoradas con campos requeridos y validaciones actualizadas
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
@@ -12,11 +11,12 @@ from flask_jwt_extended import (
 )
 from models.cliente import Cliente
 from config.database import db
-from datetime import timedelta
+from datetime import timedelta, datetime
 from werkzeug.security import generate_password_hash
 import re
 import os
 from functools import wraps
+import traceback
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -55,6 +55,7 @@ def handle_errors(f):
             return f(*args, **kwargs)
         except Exception as e:
             db.session.rollback()
+            traceback.print_exc()  # Log del error completo
             return jsonify({'error': 'Error interno del servidor'}), 500
     return wrapper
 
@@ -63,14 +64,45 @@ def handle_errors(f):
 def registro_cliente():
     data = request.get_json()
     
-    # Validación de campos
-    required_fields = ['nombre', 'email', 'password']
+    # Campos requeridos actualizados
+    required_fields = ['nombre', 'email', 'password', 'cedula', 'fecha_nacimiento']
     if not all(k in data for k in required_fields):
         return jsonify({'error': f'Campos requeridos faltantes: {required_fields}'}), 400
     
-    email = normalize_email(data['email'])
+    # Validación de formato de cédula
+    if not re.match(r'^[VE]-\d{6,8}$', data['cedula']):
+        return jsonify({'error': 'Formato de cédula inválido. Use V-12345678'}), 400
     
-    # Validaciones
+    # Validación de fecha de nacimiento
+    try:
+        # 1. Obtener y normalizar el valor del request
+        fecha_str = data['fecha_nacimiento']  # Recibe formato ISO: "2001-04-18"
+        
+        # 2. Parsear a objeto date
+        fecha_nacimiento = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        
+        # 3. Validaciones adicionales
+        hoy = datetime.now().date()
+        if fecha_nacimiento > hoy:
+            return jsonify({'error': 'La fecha no puede ser futura'}), 400
+            
+        edad = hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
+        if edad < 18:
+            return jsonify({'error': 'Debes tener al menos 18 años'}), 400
+
+    except ValueError as e:
+        return jsonify({
+            'error': 'Formato de fecha inválido',
+            'detalle': str(e),
+            'formato_requerido': 'YYYY-MM-DD',
+            'ejemplo_valido': '2001-04-18',
+            'valor_recibido': data.get('fecha_nacimiento')
+        }), 400
+
+    
+    email = normalize_email(data['email'])
+        
+    # Validaciones de email y contraseña
     if not validate_email_format(email):
         return jsonify({'error': 'Formato de email inválido'}), 400
     
@@ -81,25 +113,31 @@ def registro_cliente():
     if Cliente.query.filter_by(email=email).first():
         return jsonify({'error': 'El email ya está registrado'}), 409
     
-    # Crear usuario
+    if Cliente.query.filter_by(cedula=data['cedula'].upper()).first():
+        return jsonify({'error': 'La cédula ya está registrada'}), 409
+    
+    # Crear usuario con nuevos campos
     hashed_password = generate_password_hash(data['password'])
     nuevo_cliente = Cliente(
+        cedula=data['cedula'].upper().strip(),
         nombre=data['nombre'].strip(),
         email=email,
         password=hashed_password,
         telefono=data.get('telefono', '').strip(),
+        fecha_nacimiento=fecha_nacimiento,
         es_miembro=data.get('es_miembro', False)
     )
     
     db.session.add(nuevo_cliente)
     db.session.commit()
     
-    # Generar tokens
+    # Generar tokens con información actualizada
     user_claims = {
         'id': nuevo_cliente.id,
         'email': nuevo_cliente.email,
         'nombre': nuevo_cliente.nombre,
         'es_miembro': nuevo_cliente.es_miembro,
+        'cedula': nuevo_cliente.cedula,
         'rol': 'cliente'
     }
     
@@ -124,7 +162,6 @@ def registro_cliente():
 def login_cliente():
     data = request.get_json()
     
-    # Validaciones básicas
     if not data or 'email' not in data or 'password' not in data:
         return jsonify({'error': 'Email y contraseña requeridos'}), 400
     
@@ -133,16 +170,15 @@ def login_cliente():
     
     cliente = Cliente.query.filter_by(email=email).first()
     
-    # Verificar credenciales
     if not cliente or not cliente.verificar_password(password):
         return jsonify({'error': 'Credenciales inválidas'}), 401
     
-    # Generar tokens
     user_claims = {
         'id': cliente.id,
         'email': cliente.email,
         'nombre': cliente.nombre,
         'es_miembro': cliente.es_miembro,
+        'cedula': cliente.cedula,
         'rol': 'cliente'
     }
     
@@ -150,18 +186,15 @@ def login_cliente():
         identity=user_claims,
         expires_delta=timedelta(hours=TOKEN_EXPIRATION_HOURS)
     )
-    refresh_token = create_refresh_token(
-        identity=user_claims,
-        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRATION_DAYS)
-    )
-    
+
     return jsonify({
         'access_token': access_token,
         'cliente': {
             'id': cliente.id,
             'nombre': cliente.nombre,
             'email': cliente.email,
-            'es_miembro': cliente.es_miembro  # Ahora será 0 o 1
+            'cedula': cliente.cedula,
+            'es_miembro': cliente.es_miembro
         }
     }), 200
 
@@ -171,8 +204,7 @@ def refresh_token():
     current_user = get_jwt_identity()
     new_token = create_access_token(
         identity=current_user,
-        expires_delta=timedelta(hours=TOKEN_EXPIRATION_HOURS)
-    )
+        expires_delta=timedelta(hours=TOKEN_EXPIRATION_HOURS))
     return jsonify({'access_token': new_token}), 200
 
 @auth_bp.route('/perfil', methods=['GET'])
@@ -189,18 +221,20 @@ def obtener_perfil():
             'id': cliente.id,
             'nombre': cliente.nombre,
             'email': cliente.email,
+            'cedula': cliente.cedula,
             'es_miembro': cliente.es_miembro,
             'telefono': cliente.telefono,
+            'fecha_nacimiento': cliente.fecha_nacimiento.isoformat(),
             'fecha_registro': cliente.fecha_registro.isoformat()
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        traceback.print_exc()
+        return jsonify({'error': 'Error al obtener perfil'}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    # Implementar lógica de revocación de tokens si es necesario
     return jsonify({'mensaje': 'Logout exitoso'}), 200
 
 @auth_bp.route('/test', methods=['GET'])

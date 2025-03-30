@@ -203,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
             onClick={() => handleNavigation('/bh-member')}
             startIcon={<Star />}
           >
-            BH Member
+            NP Member
           </BHMemberButton>
           <ThemeToggle onClick={onModeChange} aria-label="toggle theme">
             {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}

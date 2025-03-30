@@ -23,6 +23,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import PurchaseFlow from './PurchaseFlow';
+import { useAuth } from './AuthContext'; // Asegúrate de que la ruta sea correcta
 
 interface MovieDetailsProps {
   mode: 'dark' | 'light';
@@ -392,12 +393,14 @@ const moviesData: Record<string, Movie> = {
 const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLoggedIn = false }) => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth(); // Obtiene el contexto de autenticación
   const [selectedRoom, setSelectedRoom] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [showPurchaseFlow, setShowPurchaseFlow] = useState(false);
   const [roomSchedules, setRoomSchedules] = useState<Record<string, string[]>>({});
   const [trailerOpen, setTrailerOpen] = useState(false);
+  const [loginWarning, setLoginWarning] = useState<string>(''); // Nuevo estado para el mensaje
 
   const movie = id ? moviesData[id as keyof typeof moviesData] : null;
 
@@ -510,6 +513,15 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
 
   const handleStartPurchase = () => {
     if (!selectedTime || !selectedRoom || !selectedLanguage) return;
+
+    if (!user) { // Añadido: Verificar si el usuario está autenticado
+      setLoginWarning('Debes iniciar sesión para comprar entradas.'); // Configura el mensaje
+            setTimeout(() => {
+                navigate('/login'); // Redireccionar después de unos segundos
+            }, 2000); // 2 segundos
+      return; // Evitar continuar con la compra
+  }
+
     setShowPurchaseFlow(true);
   };
 
@@ -543,245 +555,253 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: mode === 'dark' ? '#0a192f' : '#f0f8ff' }}>
-      <Navbar mode={mode} onModeChange={onModeChange} />
-      <BackButton onClick={() => navigate('/cartelera')}>
-        <ArrowBack />
-      </BackButton>
-      <Container maxWidth="lg" sx={{ pt: 12, pb: 8 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <MovieImage
-              sx={{
-                backgroundImage: `url(${movie.imageUrl})`,
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
-                height: '400px',
-              }}
-            />
-            {movie.trailerUrl && (
-              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                <TrailerButton
-                  onClick={handleTrailerOpen}
-                  startIcon={<PlayCircle sx={{ fontSize: '1.5rem' }} />}
-                >
-                  Ver Trailer
-                </TrailerButton>
-              </Box>
-            )}
-            
-            <Dialog
-              open={trailerOpen}
-              onClose={handleTrailerClose}
-              maxWidth="md"
-              fullWidth
-            >
-              <DialogContent sx={{ 
-                p: 0, 
-                backgroundColor: 'black',
-                aspectRatio: '16/9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                {movie.trailerUrl && (
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    // src={movie.trailerUrl}
-                    src={movie.trailerUrl.replace('youtu.be/', 'www.youtube.com/embed/').split('?')[0] + '?autoplay=1&rel=0&modestbranding=1'}
-                    title={`${movie.title} Trailer`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                )}
-              </DialogContent>
-            </Dialog>
+        <Navbar mode={mode} onModeChange={onModeChange} />
+        <BackButton onClick={() => navigate('/cartelera')}>
+            <ArrowBack />
+        </BackButton>
 
-            <Box sx={{ 
-              mt: 3, 
-              p: 3, 
-              backgroundColor: mode === 'dark' ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)', 
-              borderRadius: '16px',
-            }}>
-              <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
-                Tipos de Sala
-              </Typography>
-              <Grid container spacing={2}>
-                {availableRooms.map((room) => (
-                  <Grid item xs={12} key={room.id}>
-                    <Box sx={{ 
-                      p: 1.5,
-                      borderRadius: '8px',
-                      border: `1px solid ${mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)'}`,
-                    }}>
-                      <Typography variant="subtitle1" sx={{ 
-                        color: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                        fontWeight: 'bold',
-                        mb: 0.5
-                      }}>
-                        {room.name}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
-                        {room.description}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <InfoContainer>
-              <Typography variant="h3" gutterBottom>
-                {movie.title}
-              </Typography>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <Rating value={movie.rating} precision={0.5} readOnly />
-                <Typography variant="body1" sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
-                  {movie.rating}/5
+        <Container maxWidth="lg" sx={{ pt: 12, pb: 8 }}>
+            {/* Mostrar mensaje de advertencia */}
+            {loginWarning && (
+                <Typography variant="body1" color="error" align="center" sx={{ mb: 2 }}>
+                    {loginWarning}
                 </Typography>
-              </Box>
+            )}
 
-              <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-                {movie.genre.map((genre) => (
-                  <Chip
-                    key={genre}
-                    label={genre}
-                    sx={{
-                      backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.1)' : 'rgba(255, 140, 50, 0.1)',
-                      color: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                    }}
-                  />
-                ))}
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AccessTime sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }} />
-                  <Typography>{movie.duration}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CalendarToday sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }} />
-                  <Typography>{movie.releaseDate}</Typography>
-                </Box>
-              </Box>
-
-              <Typography variant="body1" paragraph sx={{ mb: 4 }}>
-                {movie.description}
-              </Typography>
-
-              <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32', mb: 2 }}>
-                Idioma
-              </Typography>
-
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
-                {languageOptions.map((lang) => (
-                  <Button
-                    key={lang.id}
-                    variant={selectedLanguage === lang.id ? 'contained' : 'outlined'}
-                    onClick={() => handleLanguageSelect(lang.id)}
-                    sx={{
-                      borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                      color: selectedLanguage === lang.id ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
-                      backgroundColor: selectedLanguage === lang.id 
-                        ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
-                        : 'transparent',
-                      '&:hover': {
-                        backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
-                      },
-                    }}
-                  >
-                    {lang.name}
-                  </Button>
-                ))}
-              </Box>
-
-              <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32', mb: 2 }}>
-                Salas Disponibles
-              </Typography>
-
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
-                {availableRooms.map((room) => (
-                  <Button
-                    key={room.id}
-                    variant={selectedRoom === room.id ? 'contained' : 'outlined'}
-                    onClick={() => handleRoomSelect(room.id)}
-                    sx={{
-                      borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                      color: selectedRoom === room.id ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
-                      backgroundColor: selectedRoom === room.id 
-                        ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
-                        : 'transparent',
-                      '&:hover': {
-                        backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
-                      },
-                      minWidth: '120px'
-                    }}
-                  >
-                    {`${room.name} - $${calculatePrice(room.id).toFixed(2)}`}
-                  </Button>
-                ))}
-              </Box>
-
-              {selectedRoom && selectedLanguage && (
-                <>
-                  <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
-                    Horarios Disponibles
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
-                    {roomSchedules[selectedRoom]?.map((time) => (
-                      <Button
-                        key={time}
-                        variant={selectedTime === time ? 'contained' : 'outlined'}
-                        onClick={() => handleTimeSelect(time)}
+            <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
+                    <MovieImage
                         sx={{
-                          borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                          color: selectedTime === time ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
-                          backgroundColor: selectedTime === time 
-                            ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
-                            : 'transparent',
-                          '&:hover': {
-                            backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
-                          },
+                            backgroundImage: `url(${movie.imageUrl})`,
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                            height: '400px',
                         }}
-                      >
-                        {time}
-                      </Button>
-                    ))}
-                  </Box>
-                </>
-              )}
+                    />
+                    {movie.trailerUrl && (
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <TrailerButton
+                                onClick={handleTrailerOpen}
+                                startIcon={<PlayCircle sx={{ fontSize: '1.5rem' }} />}
+                            >
+                                Ver Trailer
+                            </TrailerButton>
+                        </Box>
+                    )}
 
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                {selectedRoom && (
-                  <Typography variant="h6" sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
-                    Precio: ${calculatePrice(selectedRoom).toFixed(2)}
-                  </Typography>
-                )}
-                <Button
-                  variant="contained"
-                  startIcon={<EventSeat />}
-                  disabled={!selectedTime || !selectedRoom || !selectedLanguage}
-                  onClick={handleStartPurchase}
-                  sx={{
-                    backgroundColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                    '&:hover': {
-                      backgroundColor: mode === 'dark' ? '#0299d6' : '#ff7b1f',
-                    }
-                  }}
-                >
-                  COMPRAR ENTRADA
-                </Button>
-              </Box>
-            </InfoContainer>
-          </Grid>
-        </Grid>
-      </Container>
+                    <Dialog
+                        open={trailerOpen}
+                        onClose={handleTrailerClose}
+                        maxWidth="md"
+                        fullWidth
+                    >
+                        <DialogContent sx={{
+                            p: 0,
+                            backgroundColor: 'black',
+                            aspectRatio: '16/9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            {movie.trailerUrl && (
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    src={movie.trailerUrl.replace('youtu.be/', 'www.youtube.com/embed/').split('?')[0] + '?autoplay=1&rel=0&modestbranding=1'}
+                                    title={`${movie.title} Trailer`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            )}
+                        </DialogContent>
+                    </Dialog>
+
+                    <Box sx={{
+                        mt: 3,
+                        p: 3,
+                        backgroundColor: mode === 'dark' ? 'rgba(26, 32, 44, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+                        borderRadius: '16px',
+                    }}>
+                        <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
+                            Tipos de Sala
+                        </Typography>
+                        <Grid container spacing={2}>
+                            {availableRooms.map((room) => (
+                                <Grid item xs={12} key={room.id}>
+                                    <Box sx={{
+                                        p: 1.5,
+                                        borderRadius: '8px',
+                                        border: `1px solid ${mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)'}`,
+                                    }}>
+                                        <Typography variant="subtitle1" sx={{
+                                            color: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                            fontWeight: 'bold',
+                                            mb: 0.5
+                                        }}>
+                                            {room.name}
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                                            {room.description}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                    <InfoContainer>
+                        <Typography variant="h3" gutterBottom>
+                            {movie.title}
+                        </Typography>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                            <Rating value={movie.rating} precision={0.5} readOnly />
+                            <Typography variant="body1" sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
+                                {movie.rating}/5
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                            {movie.genre.map((genre) => (
+                                <Chip
+                                    key={genre}
+                                    label={genre}
+                                    sx={{
+                                        backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.1)' : 'rgba(255, 140, 50, 0.1)',
+                                        color: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                    }}
+                                />
+                            ))}
+                        </Box>
+
+                        <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <AccessTime sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }} />
+                                <Typography>{movie.duration}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CalendarToday sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }} />
+                                <Typography>{movie.releaseDate}</Typography>
+                            </Box>
+                        </Box>
+
+                        <Typography variant="body1" paragraph sx={{ mb: 4 }}>
+                            {movie.description}
+                        </Typography>
+
+                        <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32', mb: 2 }}>
+                            Idioma
+                        </Typography>
+
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
+                            {languageOptions.map((lang) => (
+                                <Button
+                                    key={lang.id}
+                                    variant={selectedLanguage === lang.id ? 'contained' : 'outlined'}
+                                    onClick={() => handleLanguageSelect(lang.id)}
+                                    sx={{
+                                        borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                        color: selectedLanguage === lang.id ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
+                                        backgroundColor: selectedLanguage === lang.id
+                                            ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
+                                            : 'transparent',
+                                        '&:hover': {
+                                            backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
+                                        },
+                                    }}
+                                >
+                                    {lang.name}
+                                </Button>
+                            ))}
+                        </Box>
+
+                        <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32', mb: 2 }}>
+                            Salas Disponibles
+                        </Typography>
+
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
+                            {availableRooms.map((room) => (
+                                <Button
+                                    key={room.id}
+                                    variant={selectedRoom === room.id ? 'contained' : 'outlined'}
+                                    onClick={() => handleRoomSelect(room.id)}
+                                    sx={{
+                                        borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                        color: selectedRoom === room.id ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
+                                        backgroundColor: selectedRoom === room.id
+                                            ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
+                                            : 'transparent',
+                                        '&:hover': {
+                                            backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
+                                        },
+                                        minWidth: '120px'
+                                    }}
+                                >
+                                    {`${room.name} - $${calculatePrice(room.id).toFixed(2)}`}
+                                </Button>
+                            ))}
+                        </Box>
+
+                        {selectedRoom && selectedLanguage && (
+                            <>
+                                <Typography variant="h6" gutterBottom sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
+                                    Horarios Disponibles
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
+                                    {roomSchedules[selectedRoom]?.map((time) => (
+                                        <Button
+                                            key={time}
+                                            variant={selectedTime === time ? 'contained' : 'outlined'}
+                                            onClick={() => handleTimeSelect(time)}
+                                            sx={{
+                                                borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                                color: selectedTime === time ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
+                                                backgroundColor: selectedTime === time
+                                                    ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
+                                                    : 'transparent',
+                                                '&:hover': {
+                                                    backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
+                                                },
+                                            }}
+                                        >
+                                            {time}
+                                        </Button>
+                                    ))}
+                                </Box>
+                            </>
+                        )}
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            {selectedRoom && (
+                                <Typography variant="h6" sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
+                                    Precio: ${calculatePrice(selectedRoom).toFixed(2)}
+                                </Typography>
+                            )}
+                            <Button
+                                variant="contained"
+                                startIcon={<EventSeat />}
+                                disabled={!selectedTime || !selectedRoom || !selectedLanguage}
+                                onClick={handleStartPurchase}
+                                sx={{
+                                    backgroundColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                    '&:hover': {
+                                        backgroundColor: mode === 'dark' ? '#0299d6' : '#ff7b1f',
+                                    }
+                                }}
+                            >
+                                COMPRAR ENTRADA
+                            </Button>
+                        </Box>
+                    </InfoContainer>
+                </Grid>
+            </Grid>
+        </Container>
     </Box>
-  );
+);
 };
 
-export default MovieDetails; 
+export default MovieDetails;

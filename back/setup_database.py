@@ -1,5 +1,5 @@
 """
-Script para configurar la base de datos completa del cine
+Script para configurar la base de datos completa del cine (versión simplificada)
 """
 from flask import Flask
 from config.database import db
@@ -20,154 +20,74 @@ def create_database():
             
             cursor.execute("USE cine_db")
             
-            # Eliminar tablas existentes en orden correcto (por dependencias de FK)
+            # Eliminar tablas existentes en orden correcto
             tables = [
-                'ventas_snacks', 'detalles_reserva', 'reservas',
-                'funciones', 'asientos', 'salas', 'peliculas',
-                'promociones', 'snacks', 'clientes'
+                'detalles_reserva', 'reservas', 
+                'snacks', 'clientes'
             ]
             
             for table in tables:
                 cursor.execute(f"DROP TABLE IF EXISTS {table}")
                 print(f"🗑️  Tabla {table} eliminada (si existía)")
             
-            # Crear todas las tablas
+            # Crear tablas principales
             create_tables_queries = [
                 """
-            CREATE TABLE clientes (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                nombre VARCHAR(100) NOT NULL,
-                email VARCHAR(120) UNIQUE NOT NULL,  -- ✅ NOT NULL añadido
-                password VARCHAR(200) NOT NULL,      -- ✅ Longitud corregida
-                telefono VARCHAR(20),
-                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- ✅ Tipo cambiado
-                es_miembro TINYINT(1) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;  -- ✅ Collation
-                """,
-                
-                """
-                CREATE TABLE salas (
+                CREATE TABLE clientes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    numero VARCHAR(10) NOT NULL,
-                    capacidad INT NOT NULL,
-                    tipo VARCHAR(20),
-                    estado VARCHAR(20),
+                    cedula VARCHAR(15) UNIQUE NOT NULL,
+                    nombre VARCHAR(100) NOT NULL,
+                    email VARCHAR(120) UNIQUE NOT NULL,
+                    password VARCHAR(200) NOT NULL,
+                    telefono VARCHAR(20),
+                    fecha_nacimiento DATE NOT NULL,
+                    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    es_miembro TINYINT(1) DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                """,
-                
-                """
-                CREATE TABLE peliculas (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    titulo VARCHAR(200) NOT NULL,
-                    sinopsis TEXT,
-                    duracion INT,
-                    clasificacion VARCHAR(10),
-                    genero VARCHAR(50),
-                    director VARCHAR(100),
-                    fecha_estreno DATE,
-                    poster_url VARCHAR(255),
-                    estado VARCHAR(20),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                """,
-                
-                """
-                CREATE TABLE funciones (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    pelicula_id INT,
-                    sala_id INT,
-                    fecha DATE NOT NULL,
-                    hora_inicio TIME NOT NULL,
-                    precio_general DECIMAL(10,2),
-                    precio_reducido DECIMAL(10,2),
-                    estado VARCHAR(20),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (pelicula_id) REFERENCES peliculas(id),
-                    FOREIGN KEY (sala_id) REFERENCES salas(id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                """,
-                
-                """
-                CREATE TABLE asientos (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    sala_id INT,
-                    fila VARCHAR(2),
-                    numero INT,
-                    tipo VARCHAR(20),
-                    estado VARCHAR(20),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (sala_id) REFERENCES salas(id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
                 """,
                 
                 """
                 CREATE TABLE reservas (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    cliente_id INT,
-                    funcion_id INT,
-                    fecha_reserva DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    estado VARCHAR(20),
+                    cliente_id INT NOT NULL,
+                    pelicula_titulo VARCHAR(200) NOT NULL,
+                    sala_numero VARCHAR(10) NOT NULL,
+                    asiento_ubicacion VARCHAR(5) NOT NULL,
+                    fecha_funcion DATETIME NOT NULL,
+                    precio_total DECIMAL(10,2) NOT NULL,
                     codigo_reserva VARCHAR(20) UNIQUE,
-                    total DECIMAL(10,2),
+                    estado VARCHAR(20) DEFAULT 'Confirmada',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
-                    FOREIGN KEY (funcion_id) REFERENCES funciones(id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                """,
-                
-                """
-                CREATE TABLE detalles_reserva (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    reserva_id INT,
-                    asiento_id INT,
-                    precio DECIMAL(10,2),
-                    tipo_entrada VARCHAR(20),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (reserva_id) REFERENCES reservas(id),
-                    FOREIGN KEY (asiento_id) REFERENCES asientos(id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
                 """,
                 
                 """
                 CREATE TABLE snacks (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    nombre VARCHAR(100) NOT NULL,
+                    nombre VARCHAR(100) NOT NULL UNIQUE,
                     descripcion TEXT,
-                    precio DECIMAL(10,2),
+                    precio DECIMAL(10,2) NOT NULL,
                     categoria VARCHAR(50),
-                    estado VARCHAR(20),
+                    stock INT DEFAULT 0,
+                    imagen_url VARCHAR(255),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
                 """,
                 
                 """
-                CREATE TABLE ventas_snacks (
+                CREATE TABLE detalles_reserva (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    reserva_id INT,
+                    reserva_id INT NOT NULL,
                     snack_id INT,
-                    cantidad INT,
-                    precio_unitario DECIMAL(10,2),
-                    total DECIMAL(10,2),
+                    cantidad INT DEFAULT 1,
+                    precio_unitario DECIMAL(10,2) NOT NULL,
+                    tipo_entrada VARCHAR(20),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (reserva_id) REFERENCES reservas(id),
                     FOREIGN KEY (snack_id) REFERENCES snacks(id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                """,
-                
-                """
-                CREATE TABLE promociones (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    nombre VARCHAR(100) NOT NULL,
-                    descripcion TEXT,
-                    descuento DECIMAL(5,2),
-                    fecha_inicio DATE,
-                    fecha_fin DATE,
-                    codigo VARCHAR(20) UNIQUE,
-                    estado VARCHAR(20),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
                 """
             ]
             
@@ -175,34 +95,37 @@ def create_database():
                 cursor.execute(query)
                 print("✅ Tabla creada exitosamente")
             
-            # Crear índices
+            # Crear índices esenciales
             index_queries = [
                 "CREATE INDEX idx_email ON clientes(email)",
-                "CREATE INDEX idx_fecha ON funciones(fecha)",
-                "CREATE INDEX idx_fecha_reserva ON reservas(fecha_reserva)",
-                "CREATE INDEX idx_sala_fila_numero ON asientos(sala_id, fila, numero)"
+                "CREATE INDEX idx_codigo_reserva ON reservas(codigo_reserva)",
+                "CREATE INDEX idx_fecha_funcion ON reservas(fecha_funcion)",
+                "CREATE INDEX idx_reserva_detalles ON detalles_reserva(reserva_id)"
             ]
             
             for query in index_queries:
                 cursor.execute(query)
                 print("🔑 Índice creado exitosamente")
             
-
-             # Insertar cliente Admin si no existe
+            # Insertar cliente Admin
             insert_admin_query = """
             INSERT IGNORE INTO clientes (
+                cedula,
                 nombre, 
                 email, 
                 password, 
-                telefono, 
+                telefono,
+                fecha_nacimiento,
                 fecha_registro, 
                 es_miembro, 
                 created_at
             ) VALUES (
+                'V-00000000',
                 'Admin',
                 'planetcinemavzla@gmail.com',
                 'scrypt:32768:8:1$UhVt5z4HM6w1gc9F$15a6d74fbc9838e76836f7e7f99d6a575ee0cb59db75452ce5c5b3cce294c1d3afeb70a2a74cfee37576a3eec21bf9863b8eba153e43062b0d5ed95080345bfb',
                 '',
+                '1990-01-01',
                 '2025-03-29 20:06:42',
                 1,
                 '2025-03-29 20:06:42'
@@ -234,8 +157,9 @@ def verify_table_structure():
             cursor.execute("DESCRIBE clientes")
             columns = {row[0] for row in cursor.fetchall()}
             required_columns = {
-                'id', 'nombre', 'email','password', 'telefono',
-                'fecha_registro', 'es_miembro', 'created_at'
+                'id', 'cedula', 'nombre', 'email', 'password',
+                'telefono', 'fecha_nacimiento', 'fecha_registro',
+                'es_miembro', 'created_at'
             }
             
             if not required_columns.issubset(columns):
@@ -267,16 +191,16 @@ def setup_database():
     
     with app.app_context():
         try:
-            # Importar después de crear la app y db
-            from models import Cliente, Reserva, Sala, Pelicula, Funcion, Asiento, DetalleReserva, Snack, VentaSnack, Promocion
+            # Importar modelos actualizados
+            from models import Cliente, Reserva, Snack, DetalleReserva
             
-            # Verificar conexión con una consulta simple
+            # Verificar conexión
             total_clientes = db.session.query(Cliente).count()
             print(f"✅ Conexión verificada. Clientes en DB: {total_clientes}")
             
         except Exception as e:
             print(f"❌ Error de conexión ORM: {str(e)}")
-            raise e  # Mostrar detalles completos del error
-            
+            raise e
+
 if __name__ == "__main__":
     setup_database()
