@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Seleccionar Asientos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
+</head>
+<body>
+    <h1>Seleccionar Asientos</h1>
+    <div class="sala">
+        <form method="POST" action="{{ url_for('seleccionar_asientos') }}">
+            {% for fila in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                <div class="fila">
+                    {% for num in range(1, 11) %}
+                        {% set asiento = fila ~ num %}
+                        <div class="asiento disponible" data-id="{{ asiento }}" onclick="SeleccionarAsiento('{{ asiento }}')">
+                            {{ asiento }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit">Confirmar Selección</button>
+        </form>
+    </div>
+</body>
+</html>
