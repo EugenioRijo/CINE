@@ -185,8 +185,11 @@ const Navbar: React.FC<NavbarProps> = ({ mode, onModeChange }) => {
           
           {user ? (
             <NavButton 
-              onClick={logout}
-              startIcon={<Person />}
+              onClick={() => {
+              logout();
+              handleNavigation('/');
+            }}              
+            startIcon={<Person />}
             >
               Cerrar Sesión ({user.nombre})
             </NavButton>
