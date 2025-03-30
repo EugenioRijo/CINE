@@ -24,7 +24,7 @@ interface AuthResponse {
     id: number;
     nombre: string;
     email: string;
-    es_miembro: boolean;
+    es_miembro: number;
   };
   error?: string;
 }
@@ -170,12 +170,18 @@ const SignInCard: React.FC<SignInCardProps> = ({ mode, onModeChange }) => {
   
         const data: AuthResponse = await response.json();
         
-        if (!response.ok) throw new Error(data.error || 'Error en el registro');
-        
+      if (!response.ok) throw new Error(data.error || 'Error en el registro');
+      
         login(data.cliente);
         const storage = rememberMe ? localStorage : sessionStorage;
         storage.setItem('token', data.access_token);
-        navigate('/');
+        
+        // Redirección para registro
+        if (data.cliente.es_miembro === 1) {
+          navigate('/admin/estadisticas');
+        } else {
+          navigate('/');
+        }
       } else {
         if (!validateForm()) return;
 
@@ -188,11 +194,17 @@ const SignInCard: React.FC<SignInCardProps> = ({ mode, onModeChange }) => {
         const data: AuthResponse = await response.json();
         
         if (!response.ok) throw new Error(data.error || 'Credenciales inválidas');
-        
+      
         login(data.cliente);
         const storage = rememberMe ? localStorage : sessionStorage;
         storage.setItem('token', data.access_token);
-        navigate('/');
+        
+        // Redirección para login
+        if (data.cliente.es_miembro === 1) {
+          navigate('/admin/estadisticas');
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error en la operación');

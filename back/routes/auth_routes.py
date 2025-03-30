@@ -157,8 +157,12 @@ def login_cliente():
     
     return jsonify({
         'access_token': access_token,
-        'refresh_token': refresh_token,
-        'cliente': user_claims
+        'cliente': {
+            'id': cliente.id,
+            'nombre': cliente.nombre,
+            'email': cliente.email,
+            'es_miembro': cliente.es_miembro  # Ahora será 0 o 1
+        }
     }), 200
 
 @auth_bp.route('/refresh', methods=['POST'])

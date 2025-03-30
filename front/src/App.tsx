@@ -18,6 +18,7 @@ import MovieDetails from './components/MovieDetails';
 import ContactForm from './components/ContactForm';
 import Events from './components/Events';
 import { AuthProvider } from './components/AuthContext';
+import AdminStats from './components/AdminStats';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -122,6 +123,10 @@ const AppContent = () => {
             path="*"
             element={<NotFound mode={isDarkMode ? 'dark' : 'light'} />}
           />
+          <Route
+              path="/admin/estadisticas"
+              element={<AdminStats mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange}/>}
+            />
         </Routes>
         <SnackBar mode={isDarkMode ? 'dark' : 'light'} />
       </Box>

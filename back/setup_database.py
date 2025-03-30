@@ -187,6 +187,30 @@ def create_database():
                 cursor.execute(query)
                 print("🔑 Índice creado exitosamente")
             
+
+             # Insertar cliente Admin si no existe
+            insert_admin_query = """
+            INSERT IGNORE INTO clientes (
+                nombre, 
+                email, 
+                password, 
+                telefono, 
+                fecha_registro, 
+                es_miembro, 
+                created_at
+            ) VALUES (
+                'Admin',
+                'planetcinemavzla@gmail.com',
+                'scrypt:32768:8:1$UhVt5z4HM6w1gc9F$15a6d74fbc9838e76836f7e7f99d6a575ee0cb59db75452ce5c5b3cce294c1d3afeb70a2a74cfee37576a3eec21bf9863b8eba153e43062b0d5ed95080345bfb',
+                '',
+                '2025-03-29 20:06:42',
+                1,
+                '2025-03-29 20:06:42'
+            )
+            """
+            cursor.execute(insert_admin_query)
+            print("👤 Cliente Admin insertado o ya existente (IGNORE)")
+            
             connection.commit()
             
         connection.close()

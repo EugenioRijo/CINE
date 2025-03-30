@@ -4,7 +4,7 @@ interface User {
   id: number;
   nombre: string;
   email: string;
-  es_miembro: boolean;
+  es_miembro: number;
 }
 
 interface AuthContextType {
