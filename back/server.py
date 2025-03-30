@@ -8,13 +8,17 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
+from config.database import db
+from routes.auth_routes import auth_bp
+from routes.api import clientes_blueprint, compras_blueprint
+from routes.membership import membership_bp
+from routes.bcv import bcv_bp
 
 # Añadir el directorio raíz al path de Python
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)  # Cambiado de sys.path.insert para incluir el directorio actual
 
 # Importaciones después de ajustar el path
-from config.database import db
 from routes import register_routes
 
 load_dotenv()
@@ -56,6 +60,13 @@ def create_app():
     @app.route('/api/test')
     def test():
         return jsonify({"mensaje": "API funcionando correctamente"})
+    
+    # Registrar blueprints
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(clientes_blueprint, url_prefix='/api/clientes')
+    app.register_blueprint(compras_blueprint, url_prefix='/api/compras')
+    app.register_blueprint(membership_bp)
+    app.register_blueprint(bcv_bp)
     
     # Registrar rutas
     register_routes(app)

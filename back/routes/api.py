@@ -3,14 +3,34 @@ from werkzeug.security import generate_password_hash
 from models.cliente import Cliente
 from config.database import db
 import re
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from functools import wraps
 
 # Configurar Blueprint con prefijo y nombre correcto
 clientes_blueprint = Blueprint('clientes', __name__, url_prefix='/api/clientes')
+compras_blueprint = Blueprint('compras', __name__)
 
 def validar_email(email):
     """Valida el formato del email usando regex"""
     patron = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(patron, email) is not None
+
+# Decorador personalizado para verificar autenticación
+def requiere_autenticacion(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'error': 'Se requiere autenticación para realizar esta operación'}), 401
+        try:
+            # Verificar el token y obtener la identidad del usuario
+            current_user = get_jwt_identity()
+            if not current_user:
+                return jsonify({'error': 'Token inválido'}), 401
+            return f(*args, **kwargs)
+        except Exception as e:
+            return jsonify({'error': 'Error de autenticación'}), 401
+    return decorated_function
 
 @clientes_blueprint.route('', methods=['POST'])
 def crear_cliente():
@@ -64,3 +84,42 @@ def crear_cliente():
         # En producción deberías usar un logger aquí
         print(f"Error al crear cliente: {str(e)}")
         return jsonify({'error': 'Error interno del servidor'}), 500
+
+@compras_blueprint.route('/iniciar-compra', methods=['POST'])
+@jwt_required()
+def iniciar_compra():
+    try:
+        # Obtener datos del usuario autenticado
+        current_user = get_jwt_identity()
+        
+        # Validar datos de la compra
+        data = request.get_json()
+        if not data or not all(k in data for k in ['pelicula_id', 'horario_id', 'asientos']):
+            return jsonify({'error': 'Datos de compra incompletos'}), 400
+            
+        # Aquí iría la lógica de validación de asientos y creación de la compra
+        
+        return jsonify({
+            'mensaje': 'Compra iniciada exitosamente',
+            'compra_id': 'nuevo_id_compra'  # Aquí iría el ID real de la compra
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@compras_blueprint.route('/confirmar-compra/<compra_id>', methods=['POST'])
+@jwt_required()
+def confirmar_compra(compra_id):
+    try:
+        # Obtener datos del usuario autenticado
+        current_user = get_jwt_identity()
+        
+        # Aquí iría la lógica de confirmación de la compra
+        
+        return jsonify({
+            'mensaje': 'Compra confirmada exitosamente',
+            'compra_id': compra_id
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

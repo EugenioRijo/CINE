@@ -12,7 +12,7 @@ from flask_jwt_extended import (
 )
 from models.cliente import Cliente
 from config.database import db
-from datetime import timedelta
+from datetime import timedelta, datetime
 from werkzeug.security import generate_password_hash
 import re
 import os
@@ -24,6 +24,7 @@ auth_bp = Blueprint('auth', __name__)
 TOKEN_EXPIRATION_HOURS = int(os.getenv('TOKEN_EXPIRATION_HOURS', 2))
 REFRESH_TOKEN_EXPIRATION_DAYS = int(os.getenv('REFRESH_TOKEN_EXPIRATION_DAYS', 7))
 MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))
+MINIMUM_AGE = 18  # Edad mínima requerida
 
 # Helpers de validación
 def validate_email_format(email: str) -> bool:
@@ -47,6 +48,12 @@ def normalize_email(email: str) -> str:
     """Normaliza el email a minúsculas y sin espacios"""
     return email.strip().lower()
 
+def calculate_age(birth_date):
+    """Calcula la edad basada en la fecha de nacimiento"""
+    today = datetime.now()
+    age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    return age
+
 # Decorador para manejo de errores
 def handle_errors(f):
     @wraps(f)
@@ -64,13 +71,25 @@ def registro_cliente():
     data = request.get_json()
     
     # Validación de campos
-    required_fields = ['nombre', 'email', 'password']
+    required_fields = ['nombre', 'email', 'password', 'fecha_nacimiento']
     if not all(k in data for k in required_fields):
         return jsonify({'error': f'Campos requeridos faltantes: {required_fields}'}), 400
     
     email = normalize_email(data['email'])
     
-    # Validaciones
+    # Validar fecha de nacimiento y edad mínima
+    try:
+        fecha_nacimiento = datetime.strptime(data['fecha_nacimiento'], '%Y-%m-%d')
+        edad = calculate_age(fecha_nacimiento)
+        if edad < MINIMUM_AGE:
+            return jsonify({
+                'error': f'Debes tener al menos {MINIMUM_AGE} años para registrarte',
+                'edad_actual': edad
+            }), 400
+    except ValueError:
+        return jsonify({'error': 'Formato de fecha inválido. Usa YYYY-MM-DD'}), 400
+    
+    # Validaciones existentes
     if not validate_email_format(email):
         return jsonify({'error': 'Formato de email inválido'}), 400
     
@@ -88,7 +107,8 @@ def registro_cliente():
         email=email,
         password=hashed_password,
         telefono=data.get('telefono', '').strip(),
-        es_miembro=data.get('es_miembro', False)
+        es_miembro=data.get('es_miembro', False),
+        fecha_nacimiento=fecha_nacimiento
     )
     
     db.session.add(nuevo_cliente)
@@ -100,7 +120,8 @@ def registro_cliente():
         'email': nuevo_cliente.email,
         'nombre': nuevo_cliente.nombre,
         'es_miembro': nuevo_cliente.es_miembro,
-        'rol': 'cliente'
+        'rol': 'cliente',
+        'edad': edad
     }
     
     access_token = create_access_token(
@@ -212,3 +233,25 @@ def test():
             'refresh_token_expiration_days': REFRESH_TOKEN_EXPIRATION_DAYS
         }
     })
+
+@auth_bp.route('/api/auth/check-age', methods=['POST'])
+@jwt_required()
+def check_age():
+    try:
+        current_user_id = get_jwt_identity()
+        user = Cliente.query.get(current_user_id)
+        
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+            
+        # Calcular edad basado en la fecha de nacimiento
+        today = datetime.now()
+        age = today.year - user.fecha_nacimiento.year - ((today.month, today.day) < (user.fecha_nacimiento.month, user.fecha_nacimiento.day))
+        
+        return jsonify({
+            "isElderly": age >= 60,  # Consideramos adulto mayor a partir de 60 años
+            "age": age
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

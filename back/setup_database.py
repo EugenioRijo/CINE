@@ -24,7 +24,7 @@ def create_database():
             tables = [
                 'ventas_snacks', 'detalles_reserva', 'reservas',
                 'funciones', 'asientos', 'salas', 'peliculas',
-                'promociones', 'snacks', 'clientes'
+                'promociones', 'snacks', 'clientes', 'membresias'
             ]
             
             for table in tables:
@@ -167,6 +167,20 @@ def create_database():
                     codigo VARCHAR(20) UNIQUE,
                     estado VARCHAR(20),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                """,
+                
+                """
+                CREATE TABLE membresias (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    cliente_id INT NOT NULL,
+                    tipo VARCHAR(20) NOT NULL,  -- 'monthly' o 'annual'
+                    fecha_inicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    fecha_expiracion TIMESTAMP NOT NULL,
+                    esta_activa TINYINT(1) DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                 """
             ]
