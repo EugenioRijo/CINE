@@ -16,13 +16,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // Usuario por defecto para desarrollo
+  const defaultUser: User = {
+    id: 1,
+    nombre: 'Usuario Desarrollo',
+    email: 'dev@example.com',
+    es_miembro: 1
+  };
+
+  const [user, setUser] = useState<User | null>(defaultUser); // Inicializamos con el usuario por defecto
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('cliente');
+    // Comentamos la verificación del localStorage para mantener siempre el usuario por defecto
+    /*const storedUser = localStorage.getItem('cliente');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
-    }
+    }*/
   }, []);
 
   const login = (userData: User) => {
@@ -31,7 +40,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   };
 
   const logout = () => {
-    setUser(null);
+    setUser(defaultUser); // En lugar de null, volvemos al usuario por defecto
     localStorage.removeItem('token');
     localStorage.removeItem('cliente');
     sessionStorage.removeItem('token');

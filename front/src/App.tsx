@@ -105,7 +105,33 @@ const AppContent = () => {
           />
           <Route
             path="/payment"
-            element={<Payment mode={isDarkMode ? 'dark' : 'light'} onModeChange={handleModeChange} />}
+            element={
+              <Payment 
+                mode={isDarkMode ? 'dark' : 'light'} 
+                onModeChange={handleModeChange}
+                movieTitle=""
+                selectedTime=""
+                selectedRoom=""
+                selectedLanguage=""
+                selectedSeats={[]}
+                selectedProducts={[]}
+                selectedCombos={[]}
+                ticketPrice={{
+                  basePrice: 0,
+                  surcharge: 0,
+                  total: 0,
+                  totalBs: 0
+                }}
+                totalPrice={{
+                  subtotal: 0,
+                  productsTotal: 0,
+                  total: 0,
+                  totalBs: 0
+                }}
+                bcvRate={0}
+                bcvDate=""
+              />
+            }
           />
           <Route
             path="/movie/:id"

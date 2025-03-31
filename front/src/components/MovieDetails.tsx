@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -19,11 +19,16 @@ import {
   LocalMovies,
   EventSeat,
   PlayCircle,
+  Star,
+  NewReleases,
+  RocketLaunch,
+  Public,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import PurchaseFlow from './PurchaseFlow';
 import { useAuth } from './AuthContext'; // Asegúrate de que la ruta sea correcta
+import { getBCVRate } from './shared/bcvApi';
 
 interface MovieDetailsProps {
   mode: 'dark' | 'light';
@@ -123,29 +128,6 @@ const TrailerButton = styled(Button)(({ theme }) => ({
     : '0 3px 10px rgba(255, 64, 129, 0.3)',
 }));
 
-const rooms = {
-  '1': { name: 'Sala 1', price: '$8.99' },
-  '2': { name: 'Sala 2', price: '$8.99' },
-  '3': { name: 'Sala 3', price: '$8.99' },
-  '4': { name: 'Sala 4', price: '$8.99' },
-  '5': { name: 'Sala 5', price: '$8.99' },
-  '6': { name: 'Sala 6', price: '$8.99' },
-  '7': { name: 'Sala 7', price: '$8.99' },
-  '8': { name: 'Sala 8', price: '$8.99' },
-  '9': { name: 'Sala 9', price: '$8.99' },
-  '10': { name: 'Sala 10', price: '$8.99' },
-  '11': { name: 'Sala 11', price: '$8.99' },
-  '12': { name: 'Sala 12', price: '$8.99' },
-  '13': { name: 'Sala 13', price: '$8.99' },
-  '14': { name: 'Sala 14', price: '$8.99' },
-  '15': { name: 'Sala 15', price: '$8.99' },
-  '16': { name: 'Sala 16', price: '$8.99' },
-  '17': { name: 'Sala 17', price: '$8.99' },
-  '18': { name: 'Sala 18', price: '$8.99' },
-  '19': { name: 'Sala 19', price: '$8.99' },
-  '20': { name: 'Sala 20', price: '$8.99' },
-};
-
 interface Movie {
   title: string;
   imageUrl: string;
@@ -157,6 +139,8 @@ interface Movie {
   schedule: string[];
   releaseDate: string;
   trailerUrl?: string;
+  isNewRelease?: boolean;
+  isPreRelease?: boolean;
 }
 
 const moviesData: Record<string, Movie> = {
@@ -167,10 +151,11 @@ const moviesData: Record<string, Movie> = {
     duration: '1h 55min',
     genre: ['Fantasía', 'Aventura', 'Drama'],
     rating: 4.5,
-    price: 8.99,
+    price: 2.00,
     schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
     releaseDate: '2024',
     trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: false
   },
   '14': {
     title: 'CAPITAN AMERICA UN NUEVO MUNDO',
@@ -179,10 +164,11 @@ const moviesData: Record<string, Movie> = {
     duration: '2h 15min',
     genre: ['Acción', 'Aventura', 'Ciencia Ficción'],
     rating: 4.8,
-    price: 9.99,
+    price: 2.00,
     schedule: ['1:00 PM', '4:00 PM', '7:00 PM', '10:00 PM'],
     releaseDate: '2024',
     trailerUrl: 'https://youtu.be/i0zaDSsk08w?si=BcYvxphzKM4W6iTT',
+    isNewRelease: false
   },
   '3': {
     title: 'ATTACK ON TITAN EL ATAQUE FINAL',
@@ -191,22 +177,89 @@ const moviesData: Record<string, Movie> = {
     duration: '2h 30min',
     genre: ['Anime', 'Acción', 'Fantasía'],
     rating: 4.9,
-    price: 9.99,
+    price: 2.00,
     schedule: ['3:00 PM', '6:00 PM', '9:00 PM'],
     releaseDate: '2024',
     trailerUrl: 'https://youtu.be/3xNH23QkNpk?si=25yhurAbRYs3wGqA',
+    isNewRelease: false
   },
   '5': {
     title: 'CODIGO NEGRO',
-    imageUrl: '/img/codigonegro.jpg',
-    description: 'Un thriller de espionaje donde un agente secreto debe descubrir una conspiración internacional antes de que sea demasiado tarde.',
+    imageUrl: '/img/codigo.jpg',
+    description: 'Un thriller de espionaje que sigue a un agente encubierto en una misión para desmantelar una red internacional de tráfico de armas.',
     duration: '2h 10min',
-    genre: ['Thriller', 'Acción', 'Suspense'],
+    genre: ['Acción', 'Thriller', 'Drama'],
     rating: 4.3,
-    price: 8.99,
+    price: 2.00,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/1QdSlGXn72M?si=9FEkCNtwhMUa4r6d'
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: false
+  },
+  '6': {
+    title: 'HATSUNE MIKU CONCIERTO MUNDIAL',
+    imageUrl: '/img/miku.jpg',
+    description: 'Experimenta el fenómeno global de la idol virtual Hatsune Miku en su gira mundial más espectacular hasta la fecha.',
+    duration: '2h 00min',
+    genre: ['Música', 'Concierto', 'Animación'],
+    rating: 4.7,
+    price: 2.00,
+    schedule: ['3:30 PM', '6:00 PM', '8:30 PM'],
+    releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: true
+  },
+  '7': {
+    title: 'MINECRAFT LA PELICULA',
+    imageUrl: '/img/minecraft.jpg',
+    description: 'Sumérgete en el mundo de bloques más famoso en esta aventura épica que sigue a Steve y sus amigos en su lucha contra los mobs.',
+    duration: '1h 45min',
+    genre: ['Aventura', 'Fantasía', 'Familiar'],
+    rating: 4.6,
+    price: 2.00,
+    schedule: ['1:30 PM', '4:00 PM', '6:30 PM', '9:00 PM'],
+    releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: true
+  },
+  '8': {
+    title: 'GODZILLA X KONG EL NUEVO IMPERIO',
+    imageUrl: '/img/godzilla.jpg',
+    description: 'Los titanes más poderosos del mundo se unen para enfrentar una amenaza colosal que podría destruir la Tierra.',
+    duration: '2h 25min',
+    genre: ['Acción', 'Ciencia Ficción', 'Aventura'],
+    rating: 4.4,
+    price: 2.00,
+    schedule: ['2:15 PM', '5:00 PM', '7:45 PM', '10:30 PM'],
+    releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: false
+  },
+  '9': {
+    title: 'GHOSTBUSTERS APOCALIPSIS FANTASMA',
+    imageUrl: '/img/ghost.jpg',
+    description: 'Los cazafantasmas se enfrentan a su mayor desafío cuando una antigua profecía amenaza con desatar el apocalipsis fantasmal.',
+    duration: '2h 15min',
+    genre: ['Comedia', 'Acción', 'Fantasía'],
+    rating: 4.2,
+    price: 2.00,
+    schedule: ['3:15 PM', '6:00 PM', '8:45 PM'],
+    releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: false
+  },
+  '10': {
+    title: 'KUNG FU PANDA 4',
+    imageUrl: '/img/panda.jpg',
+    description: 'Po debe entrenar a un nuevo guerrero del dragón mientras enfrenta una amenaza que podría destruir el Valle de la Paz.',
+    duration: '1h 50min',
+    genre: ['Animación', 'Comedia', 'Acción'],
+    rating: 4.5,
+    price: 2.00,
+    schedule: ['1:45 PM', '4:15 PM', '6:45 PM', '9:15 PM'],
+    releaseDate: '2024',
+    trailerUrl: 'https://youtu.be/BE0BwFSYXOQ?si=eZovQ1JHjkuXW3wC',
+    isNewRelease: false
   },
   '11': {
     title: 'FLOW',
@@ -218,7 +271,8 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['3:30 PM', '6:00 PM', '8:30 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/izIuFUnZkjA?si=FKejhIgvD1Ip3Nj2'
+    trailerUrl: 'https://youtu.be/izIuFUnZkjA?si=FKejhIgvD1Ip3Nj2',
+    isNewRelease: false
   },
   '1': {
     title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR',
@@ -230,7 +284,8 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['2:00 PM', '4:30 PM', '7:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/RZHkQe5ThQQ?si=YTUVoqojsnbzaRbX'
+    trailerUrl: 'https://youtu.be/RZHkQe5ThQQ?si=YTUVoqojsnbzaRbX',
+    isPreRelease: true
   },
   '2': {
     title: 'UNA PELICULA DE MINECRAFT',
@@ -242,68 +297,8 @@ const moviesData: Record<string, Movie> = {
     price: 8.99,
     schedule: ['1:30 PM', '4:00 PM', '6:30 PM', '9:00 PM'],
     releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/yxrjSE8XddA?si=PiE5CpMR4beGvSLs'
-  },
-  '6': {
-    title: 'CONJURO DE LA BRUJA',
-    imageUrl: '/img/bruja.jpg',
-    description: 'Una aterradora historia de terror sobre una antigua maldición que despierta en un pueblo moderno, desatando el caos y el terror.',
-    duration: '1h 58min',
-    genre: ['Terror', 'Suspense', 'Sobrenatural'],
-    rating: 4.2,
-    price: 8.99,
-    schedule: ['4:00 PM', '6:30 PM', '9:00 PM', '11:30 PM'],
-    releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/4wIoIzcVFYw?si=FXvdJk_6_XN2ESAO'
-
-  },
-  '7': {
-    title: 'ARGYLLE',
-    imageUrl: '/img/argylle.jpg',
-    description: 'Un grupo de supervivientes debe enfrentarse a una tormenta mortal y temperaturas extremas en esta intensa película de supervivencia.',
-    duration: '2h 05min',
-    genre: ['Thriller', 'Supervivencia', 'Drama'],
-    rating: 4.1,
-    price: 8.99,
-    schedule: ['3:00 PM', '5:30 PM', '8:00 PM'],
-    releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/vTA_MQzWz3w?si=jOCGznqynaXhL1Sx'
-  },
-  '8': {
-    title: 'ARGYLLE',
-    imageUrl: '/img/argylle.jpg',
-    description: 'Un joven aprendiz de mago debe proteger un antiguo artefacto mágico de fuerzas oscuras que amenazan con destruir el equilibrio del mundo.',
-    duration: '2h 00min',
-    genre: ['Fantasía', 'Aventura', 'Familia'],
-    rating: 4.5,
-    price: 8.99,
-    schedule: ['2:00 PM', '4:30 PM', '7:00 PM', '9:30 PM'],
-    releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/vTA_MQzWz3w?si=jOCGznqynaXhL1Sx'
-  },
-  '9': {
-    title: 'NOVOCAINE',
-    imageUrl: '/img/novocaide.jpg',
-    description: 'Un thriller psicológico que sigue a un dentista cuya vida da un giro oscuro cuando se ve envuelto en una conspiración criminal.',
-    duration: '1h 55min',
-    genre: ['Thriller', 'Drama', 'Crimen'],
-    rating: 4.3,
-    price: 8.99,
-    schedule: ['4:30 PM', '7:00 PM', '9:30 PM'],
-    releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/pMfULWLqifI?si=PRtr1rcuDrYUib2l'
-  },
-  '10': {
-    title: 'MICKEY 17',
-    imageUrl: '/img/my17.jpg',
-    description: 'En un futuro distópico, un clon debe enfrentarse a su propia identidad y destino mientras explora los límites de la humanidad y la tecnología.',
-    duration: '2h 20min',
-    genre: ['Ciencia Ficción', 'Drama', 'Thriller'],
-    rating: 4.6,
-    price: 9.99,
-    schedule: ['2:30 PM', '5:00 PM', '7:30 PM', '10:00 PM'],
-    releaseDate: '2024',
-    trailerUrl: 'https://youtu.be/hjS-RGoif1Q?si=-MdPs--y9z68X5FZ'
+    trailerUrl: 'https://youtu.be/yxrjSE8XddA?si=PiE5CpMR4beGvSLs',
+    isPreRelease: true
   },
   '12': {
     title: 'EL MONO',
@@ -393,14 +388,16 @@ const moviesData: Record<string, Movie> = {
 const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLoggedIn = false }) => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth(); // Obtiene el contexto de autenticación
+  const { user } = useAuth();
   const [selectedRoom, setSelectedRoom] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [showPurchaseFlow, setShowPurchaseFlow] = useState(false);
   const [roomSchedules, setRoomSchedules] = useState<Record<string, string[]>>({});
   const [trailerOpen, setTrailerOpen] = useState(false);
-  const [loginWarning, setLoginWarning] = useState<string>(''); // Nuevo estado para el mensaje
+  const [loginWarning, setLoginWarning] = useState<string>('');
+  const [bcvRate, setBcvRate] = useState<number>(0);
+  const [bcvDate, setBcvDate] = useState<string>('');
 
   const movie = id ? moviesData[id as keyof typeof moviesData] : null;
 
@@ -422,25 +419,25 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
     { 
       id: 'sala-4dx', 
       name: 'Sala 4DX', 
-      surcharge: 9,
+      surcharge: 5,
       description: 'Movimiento sincronizado y efectos ambientales'
     },
     { 
       id: 'sala-screenx', 
       name: 'Sala ScreenX', 
-      surcharge: 6,
+      surcharge: 4,
       description: 'Proyección panorámica de 270 grados'
     },
     { 
       id: 'sala-vip', 
       name: 'Sala VIP', 
-      surcharge: 7,
+      surcharge: 5,
       description: 'Asientos reclinables de lujo y servicio personalizado'
     },
     { 
       id: 'sala-imax', 
       name: 'Sala IMAX', 
-      surcharge: 8,
+      surcharge: 5,
       description: 'Pantalla gigante y calidad IMAX'
     }
   ];
@@ -452,21 +449,23 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
 
   // Función para generar horarios aleatorios para una sala
   const generateRandomSchedule = () => {
-    const baseHours = [11, 1, 3, 5, 7, 9];
-    const randomHours = [...baseHours]
+    const baseHours = [
+      '11:00 AM',
+      '1:30 PM',
+      '4:00 PM',
+      '6:30 PM',
+      '9:00 PM'
+    ];
+    
+    // Seleccionar 3 o 4 horarios aleatorios
+    return baseHours
       .sort(() => Math.random() - 0.5)
-      .slice(0, 3 + Math.floor(Math.random() * 2)); // 3 o 4 horarios por sala
-
-    return randomHours.map(hour => {
-      const minutes = Math.random() < 0.5 ? '00' : '30';
-      const period = hour >= 7 ? 'PM' : 'AM';
-      const displayHour = hour > 12 ? hour - 12 : hour;
-      return `${displayHour}:${minutes} ${period}`;
-    }).sort((a, b) => {
-      const timeA = new Date(`2024-01-01 ${a}`);
-      const timeB = new Date(`2024-01-01 ${b}`);
-      return timeA.getTime() - timeB.getTime();
-    });
+      .slice(0, 3 + Math.floor(Math.random() * 2))
+      .sort((a, b) => {
+        const timeA = new Date(`2024-01-01 ${a}`);
+        const timeB = new Date(`2024-01-01 ${b}`);
+        return timeA.getTime() - timeB.getTime();
+      });
   };
 
   // Generar horarios aleatorios para cada sala cuando se monta el componente
@@ -476,6 +475,15 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
       schedules[room.id] = generateRandomSchedule();
     });
     setRoomSchedules(schedules);
+  }, []);
+
+  useEffect(() => {
+    const fetchBCVRate = async () => {
+      const response = await getBCVRate();
+      setBcvRate(response.usd.rate);
+      setBcvDate(response.usd.date);
+    };
+    fetchBCVRate();
   }, []);
 
   if (!movie) {
@@ -507,8 +515,17 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
   };
 
   const calculatePrice = (roomId: string) => {
-    const room = availableRooms.find(r => r.id === roomId);
-    return room ? BASE_PRICE + room.surcharge : BASE_PRICE;
+    const room = availableRooms.find(room => room.id === roomId);
+    const basePrice = 2.00; // Precio base del boleto
+    const roomSurcharge = room ? room.surcharge : 0; // Recargo de la sala
+    const total = Math.min(basePrice + roomSurcharge, 7.00); // Limitamos el precio total a $7.00
+    const totalBs = total * bcvRate;
+    return {
+      basePrice,
+      surcharge: roomSurcharge,
+      total,
+      totalBs
+    };
   };
 
   const handleStartPurchase = () => {
@@ -540,6 +557,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
         <Container maxWidth="lg" sx={{ pt: 12, pb: 8 }}>
           <PurchaseFlow
             mode={mode}
+            onModeChange={onModeChange}
             movieId={id || ''}
             movieTitle={movie.title}
             selectedTime={selectedTime || ''}
@@ -573,11 +591,40 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
                     <MovieImage
                         sx={{
                             backgroundImage: `url(${movie.imageUrl})`,
-                            backgroundSize: 'contain',
+                            backgroundSize: 'cover',
                             backgroundPosition: 'center',
-                            height: '400px',
                         }}
-                    />
+                    >
+                        {movie.isNewRelease !== undefined && (
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: 16,
+                                    right: 16,
+                                    zIndex: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    backgroundColor: movie.isPreRelease ? '#9c27b0' : '#2196f3',
+                                    color: 'white',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                }}
+                            >
+                                {movie.isPreRelease ? (
+                                    <>
+                                        <Star sx={{ mr: 1 }} />
+                                        <Typography variant="subtitle1">Próximamente</Typography>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Public sx={{ mr: 1 }} />
+                                        <Typography variant="subtitle1">Estreno</Typography>
+                                    </>
+                                )}
+                            </Box>
+                        )}
+                    </MovieImage>
                     {movie.trailerUrl && (
                         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                             <TrailerButton
@@ -723,26 +770,36 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
                         </Typography>
 
                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
-                            {availableRooms.map((room) => (
-                                <Button
-                                    key={room.id}
-                                    variant={selectedRoom === room.id ? 'contained' : 'outlined'}
-                                    onClick={() => handleRoomSelect(room.id)}
-                                    sx={{
-                                        borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
-                                        color: selectedRoom === room.id ? '#fff' : (mode === 'dark' ? '#03b5fc' : '#ff8c32'),
-                                        backgroundColor: selectedRoom === room.id
-                                            ? (mode === 'dark' ? '#03b5fc' : '#ff8c32')
-                                            : 'transparent',
-                                        '&:hover': {
-                                            backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.2)' : 'rgba(255, 140, 50, 0.2)',
-                                        },
-                                        minWidth: '120px'
-                                    }}
-                                >
-                                    {`${room.name} - $${calculatePrice(room.id).toFixed(2)}`}
-                                </Button>
-                            ))}
+                            {availableRooms.map((room) => {
+                                const price = calculatePrice(room.id);
+                                return (
+                                    <Button
+                                        key={room.id}
+                                        variant={selectedRoom === room.id ? 'contained' : 'outlined'}
+                                        onClick={() => handleRoomSelect(room.id)}
+                                        sx={{
+                                            margin: 1,
+                                            borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                            color: selectedRoom === room.id
+                                                ? '#fff'
+                                                : mode === 'dark'
+                                                  ? '#03b5fc'
+                                                  : '#ff8c32',
+                                            backgroundColor: selectedRoom === room.id
+                                                ? mode === 'dark'
+                                                  ? '#03b5fc'
+                                                  : '#ff8c32'
+                                                : 'transparent',
+                                            '&:hover': {
+                                                backgroundColor: mode === 'dark' ? 'rgba(3, 181, 252, 0.1)' : 'rgba(255, 140, 50, 0.1)',
+                                                borderColor: mode === 'dark' ? '#03b5fc' : '#ff8c32',
+                                            },
+                                        }}
+                                    >
+                                        {room.name}
+                                    </Button>
+                                );
+                            })}
                         </Box>
 
                         {selectedRoom && selectedLanguage && (
@@ -775,11 +832,39 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ mode, onModeChange, isLogge
                             </>
                         )}
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 4 }}>
                             {selectedRoom && (
-                                <Typography variant="h6" sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
-                                    Precio: ${calculatePrice(selectedRoom).toFixed(2)}
-                                </Typography>
+                                <Box>
+                                    <Typography variant="h6" sx={{ color: mode === 'dark' ? '#03b5fc' : '#ff8c32' }}>
+                                        {(() => {
+                                            const price = calculatePrice(selectedRoom);
+                                            return `Precio: $${price.basePrice.toFixed(2)} + $${price.surcharge.toFixed(2)} = $${price.total.toFixed(2)}`;
+                                        })()}
+                                    </Typography>
+                                    <Typography 
+                                        variant="h5" 
+                                        sx={{ 
+                                            color: '#4caf50',
+                                            fontWeight: 'bold',
+                                            mt: 1
+                                        }}
+                                    >
+                                        {(() => {
+                                            const price = calculatePrice(selectedRoom);
+                                            return `Bs. ${price.totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                        })()}
+                                    </Typography>
+                                    <Typography 
+                                        variant="caption" 
+                                        sx={{ 
+                                            color: 'text.secondary',
+                                            display: 'block',
+                                            mt: 0.5
+                                        }}
+                                    >
+                                        {`Tasa BCV: ${bcvRate.toFixed(2)} - ${bcvDate}`}
+                                    </Typography>
+                                </Box>
                             )}
                             <Button
                                 variant="contained"

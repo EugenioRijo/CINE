@@ -2,6 +2,13 @@ import React from 'react';
 import { Box, Grid, Typography, Button, styled } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
+import {
+  Brightness4,
+  Brightness7,
+  RocketLaunch,
+  Public,
+  Star,
+} from '@mui/icons-material';
 
 interface MovieShowcaseProps {
   mode: 'dark' | 'light';
@@ -13,6 +20,8 @@ interface Movie {
   title: string;
   imageUrl: string;
   isTop?: boolean;
+  isNewRelease?: boolean;
+  isPreRelease?: boolean;
 }
 
 // Función para generar un color aleatorio para los placeholders
@@ -27,17 +36,17 @@ const getRandomColor = () => {
 
 const movies: Movie[] = [
   // TOP 5
-  { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true },
+  { id: '4', title: 'BLANCANIEVES', imageUrl:'/img/blanca.jpg', isTop: true, isNewRelease: false },
   { id: '14', title: 'CAPITAN AMERICA UN NUEVO MUNDO', imageUrl:'/img/capitan.jpg', isTop: true },
-  { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl:'/img/titan.jpg', isTop: true },
-  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true },
+  { id: '3', title: 'ATTACK ON TITAN EL ATAQUE FINAL', imageUrl:'/img/titan.jpg', isTop: true, isNewRelease: false },
+  { id: '5', title: 'CODIGO NEGRO', imageUrl:'/img/codigonegro.jpg', isTop: true, isNewRelease: false },
   { id: '11', title: 'FLOW', imageUrl:'/img/flow.jpg', isTop: true },
   // Cartelera Regular
-  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg' },
-  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg' },
+  { id: '1', title: 'COLORFUL STAGE MIKU NO PUEDE CANTAR', imageUrl:'/img/miku.jpg', isPreRelease: true },
+  { id: '2', title: 'UNA PELICULA DE MINECRAFT', imageUrl:'/img/minecraft.jpg', isPreRelease: true },
   { id: '6', title: 'CONJURO DE LA BRUJA', imageUrl:'/img/bruja.jpg' },
-  { id: '8', title: 'ARGYLLE', imageUrl:'/img/argylle.jpg' },
-  { id: '9', title: 'NOVOCAINE', imageUrl:'/img/novocaide.jpg' },
+  { id: '8', title: 'ARGYLLE', imageUrl:'/img/argylle.jpg', isNewRelease: false },
+  { id: '9', title: 'NOVOCAINE', imageUrl:'/img/novocaide.jpg', isNewRelease: false },
   { id: '10', title: 'MICKEY 17', imageUrl:'/img/my17.jpg' },
   { id: '12', title: 'EL MONO', imageUrl:'/img/elmono.jpg' },
   { id: '13', title: 'OPERACION PANDA', imageUrl:'/img/oppanda.jpg' },
@@ -45,7 +54,6 @@ const movies: Movie[] = [
   { id: '16', title: 'EL BRUTALISTA', imageUrl:'/img/brutalista.jpg' },
   { id: '17', title: 'ANORA', imageUrl:'/img/anora.jpg' },
   { id: '18', title: 'SONIC 3 LA PELICULA', imageUrl:'/img/soc3.jpg' },
-
 ];
 
 const ShowcaseContainer = styled(Box)(({ theme }) => ({
@@ -107,46 +115,37 @@ const MovieCard = styled(Box)(({ theme }) => ({
   },
 }));
 
-// const MoviePlaceholder = styled(Box)<{ bgcolor: string }>(({ bgcolor }) => ({
-//   width: '100%',
-//   height: '400px',
-//   backgroundColor: bgcolor,
-//   display: 'flex',
-//   alignItems: 'center',
-//   justifyContent: 'center',
-//   position: 'relative',
-//   overflow: 'hidden',
-//   '&::after': {
-//     content: '""',
-//     position: 'absolute',
-//     top: 0,
-//     left: 0,
-//     right: 0,
-//     bottom: 0,
-//     background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
-//   }
-// }));
-
-const MoviePlaceholder = styled(Box)<{ imageUrl: string }>(({ imageUrl }) => ({
+const MoviePlaceholder = styled(Box)(({ theme }) => ({
+  position: 'relative',
   width: '100%',
   height: '400px',
-  backgroundImage: `url(${imageUrl})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  position: 'relative',
+  borderRadius: '16px',
   overflow: 'hidden',
-  '&::after': {
+  '&::before': {
     content: '""',
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(45deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
-  }
+    background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)',
+  },
+}));
+
+const ReleaseTag = styled(Box)<{ tagtype: 'new' | 'pre' }>(({ theme, tagtype }) => ({
+  position: 'absolute',
+  top: 16,
+  left: 16,
+  zIndex: 2,
+  display: 'flex',
+  alignItems: 'center',
+  backgroundColor: tagtype === 'new' ? '#2196f3' : '#9c27b0',
+  color: 'white',
+  padding: '8px 16px',
+  borderRadius: '20px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
 }));
 
 const MovieInfo = styled(Box)(({ theme }) => ({
@@ -185,22 +184,22 @@ const MovieShowcase: React.FC<MovieShowcaseProps> = ({ mode, onModeChange }) => 
       {movies.map((movie) => (
         <Grid item xs={12} sm={6} md={12/columns} key={movie.id}>
           <MovieCard>
-            <MoviePlaceholder imageUrl={movie.imageUrl}>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#fff',
-                  textAlign: 'center',
-                  padding: 2,
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                  fontSize: '1rem',
-                  maxWidth: '80%',
-                  position: 'relative',
-                  zIndex: 1,
-                }}
-              >
-                
-              </Typography>
+            <MoviePlaceholder style={{ backgroundImage: `url(${movie.imageUrl})` }}>
+              {(movie.isNewRelease !== undefined || movie.isPreRelease) && (
+                <ReleaseTag tagtype={movie.isPreRelease ? 'pre' : 'new'}>
+                  {movie.isPreRelease ? (
+                    <>
+                      <Star sx={{ mr: 1 }} />
+                      <Typography variant="subtitle2">Próximamente</Typography>
+                    </>
+                  ) : movie.isNewRelease === false ? (
+                    <>
+                      <Public sx={{ mr: 1 }} />
+                      <Typography variant="subtitle2">Estreno</Typography>
+                    </>
+                  ) : null}
+                </ReleaseTag>
+              )}
             </MoviePlaceholder>
             <MovieInfo>
               <Typography

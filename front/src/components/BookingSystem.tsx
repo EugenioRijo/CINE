@@ -23,7 +23,6 @@ interface Seat {
   isOccupied: boolean;
   isSelected: boolean;
   isHandicap: boolean;
-  isReclinable: boolean;
   isDamaged?: boolean;
 }
 
@@ -33,7 +32,6 @@ interface RoomConfig {
   aisleAfter: number[];  // Posiciones donde colocar pasillos
   walkwayRows: string[]; // Filas donde colocar pasillos horizontales
   handicapSeats: { row: string; seatNumbers: number[] }[];
-  reclinableSeats?: boolean;
 }
 
 const MovieIcon = styled.div<ThemeProps>`
@@ -76,30 +74,6 @@ const Screen = styled.div<{ room: string }>`
   }
 `;
 
-const TimeSelector = styled.select`
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto 2rem auto;
-  padding: 0.8rem;
-  border-radius: 8px;
-  background: rgba(26, 32, 44, 0.95);
-  color: white;
-  border: 1px solid rgba(65, 225, 225, 0.3);
-  font-size: 1rem;
-  cursor: pointer;
-  display: block;
-
-  &:focus {
-    outline: none;
-    border-color: #41E1E1;
-  }
-
-  option {
-    background: #1a202c;
-    color: white;
-  }
-`;
-
 const SeatingArea = styled.div`
   display: flex;
   flex-direction: column;
@@ -129,7 +103,6 @@ const SeatButton = styled.button<{
   isOccupied: boolean; 
   isSelected: boolean; 
   isHandicap: boolean; 
-  isReclinable: boolean;
   isDamaged?: boolean 
 }>`
   width: 35px;
@@ -140,14 +113,12 @@ const SeatButton = styled.button<{
     isOccupied: boolean; 
     isSelected: boolean; 
     isHandicap: boolean; 
-    isReclinable: boolean;
     isDamaged?: boolean 
   }) => 
     props.isDamaged ? '#FF0000' :
     props.isOccupied ? '#666' : 
     props.isSelected ? '#4BB543' :
-    props.isHandicap ? '#FFD700' :
-    props.isReclinable ? '#FF69B4' : '#41E1E1'};
+    props.isHandicap ? '#FFD700' : '#41E1E1'};
   cursor: ${(props: { 
     isOccupied: boolean;
     isDamaged?: boolean 
@@ -186,35 +157,6 @@ const WalkwayRow = styled.div`
   border-bottom: 1px dashed rgba(65, 225, 225, 0.3);
 `;
 
-const Legend = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-top: 2rem;
-`;
-
-const LegendItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: ${(props: ThemeProps) => props.currentTheme === 'dark' ? '#ffffff' : '#4a4a4a'};
-  font-size: 0.9rem;
-`;
-
-const LegendBox = styled.div<{ color: string }>`
-  width: 20px;
-  height: 20px;
-  background: ${(props: { color: string }) => props.color};
-  border-radius: 4px;
-`;
-
-const SelectedSeatsInfo = styled.div<ThemeProps>`
-  text-align: center;
-  margin-top: 2rem;
-  color: ${(props: ThemeProps) => props.currentTheme === 'dark' ? '#ffffff' : '#4a4a4a'};
-  font-size: 1rem;
-`;
-
 function generateSeats(roomType: string): Seat[] {
   const seats: Seat[] = [];
   let id = 1;
@@ -239,8 +181,7 @@ function generateSeats(roomType: string): Seat[] {
       seatsPerRow: 20,
       aisleAfter: [6, 14],
       walkwayRows: ['D'],
-      handicapSeats: [{ row: 'G', seatNumbers: [1, 2, 19, 20] }],
-      reclinableSeats: true
+      handicapSeats: [{ row: 'G', seatNumbers: [1, 2, 19, 20] }]
     },
     'sala-screenx': {
       rows: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
@@ -254,8 +195,7 @@ function generateSeats(roomType: string): Seat[] {
       seatsPerRow: 12,
       aisleAfter: [3, 9],
       walkwayRows: ['B'],
-      handicapSeats: [{ row: 'D', seatNumbers: [1, 12] }],
-      reclinableSeats: true
+      handicapSeats: [{ row: 'D', seatNumbers: [1, 12] }]
     },
     'sala-imax': {
       rows: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
@@ -314,7 +254,6 @@ function generateSeats(roomType: string): Seat[] {
         isOccupied,
         isSelected: false,
         isHandicap,
-        isReclinable: config.reclinableSeats || false,
         isDamaged
       });
     }
@@ -365,8 +304,7 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
         seatsPerRow: 20,
         aisleAfter: [6, 14],
         walkwayRows: ['D'],
-        handicapSeats: [{ row: 'G', seatNumbers: [1, 2, 19, 20] }],
-        reclinableSeats: true
+        handicapSeats: [{ row: 'G', seatNumbers: [1, 2, 19, 20] }]
       },
       'sala-screenx': {
         rows: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
@@ -380,8 +318,7 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
         seatsPerRow: 12,
         aisleAfter: [3, 9],
         walkwayRows: ['B'],
-        handicapSeats: [{ row: 'D', seatNumbers: [1, 12] }],
-        reclinableSeats: true
+        handicapSeats: [{ row: 'D', seatNumbers: [1, 12] }]
       },
       'sala-imax': {
         rows: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
@@ -426,13 +363,11 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
                 isOccupied={seat.isOccupied}
                 isSelected={seat.isSelected}
                 isHandicap={seat.isHandicap}
-                isReclinable={seat.isReclinable}
                 isDamaged={seat.isDamaged}
                 onClick={() => handleSeatClick(seat)}
-                title={`Fila ${seat.row} Asiento ${seat.number}${seat.isHandicap ? ' (Accesible)' : ''}${seat.isReclinable ? ' (Reclinable)' : ''}`}
+                title={`Fila ${seat.row} Asiento ${seat.number}${seat.isHandicap ? ' (Accesible)' : ''}`}
               >
                 {seat.isHandicap ? <AccessibleIcon /> : null}
-                {!seat.isHandicap && seat.isReclinable ? <WeekendIcon /> : null}
               </SeatButton>
             );
           })}
@@ -453,7 +388,6 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
               isOccupied={false}
               isSelected={false}
               isHandicap={false}
-              isReclinable={false}
             />
             <Typography>Disponible</Typography>
           </Box>
@@ -463,7 +397,6 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
               isOccupied={true}
               isSelected={false}
               isHandicap={false}
-              isReclinable={false}
             />
             <Typography>Ocupado</Typography>
           </Box>
@@ -473,7 +406,6 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
               isOccupied={false}
               isSelected={false}
               isHandicap={false}
-              isReclinable={false}
               isDamaged={true}
             />
             <Typography>Dañado</Typography>
@@ -484,7 +416,6 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
               isOccupied={false}
               isSelected={true}
               isHandicap={false}
-              isReclinable={false}
             />
             <Typography>Seleccionado</Typography>
           </Box>
@@ -494,26 +425,11 @@ const BookingSystem: React.FC<BookingSystemProps> = ({ mode, onSeatsSelected, se
               isOccupied={false}
               isSelected={false}
               isHandicap={true}
-              isReclinable={false}
             >
               <AccessibleIcon />
             </SeatButton>
             <Typography>Accesible</Typography>
           </Box>
-          {selectedRoom === 'sala-vip' || selectedRoom === 'sala-4dx' ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SeatButton
-                as="div"
-                isOccupied={false}
-                isSelected={false}
-                isHandicap={false}
-                isReclinable={true}
-              >
-                <WeekendIcon />
-              </SeatButton>
-              <Typography>Reclinable</Typography>
-            </Box>
-          ) : null}
         </Box>
         {renderSeats()}
       </SeatingArea>

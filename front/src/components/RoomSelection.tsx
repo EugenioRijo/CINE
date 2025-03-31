@@ -1,216 +1,188 @@
 import React from 'react';
-import styled from 'styled-components';
 import {
-  Title,
-  Subtitle,
-  Card,
+  Box,
+  Typography,
   Grid,
-  Feature,
-  BackButton,
-  ThemeProps
-} from './shared/CommonStyles';
-import { rooms } from './shared/RoomTypes';
+  Paper,
+  Button,
+  styled,
+} from '@mui/material';
+import { WeekendOutlined } from '@mui/icons-material';
 
 interface RoomSelectionProps {
-  mode: 'light' | 'dark';
-  onRoomSelected: (room: string) => void;
-  selectedRoom: string;
-  onBack?: () => void;
+  mode: 'dark' | 'light';
+  selectedSeats: string[];
+  onSeatsChange: (seats: string[]) => void;
+  ticketPrice: {
+    basePrice: number;
+    surcharge: number;
+    total: number;
+    totalBs: number;
+  };
+  bcvRate: number;
+  bcvDate: string;
 }
 
-interface RoomCardProps {
-  isSelected: boolean;
-}
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.mode === 'dark' ? '#1a2027' : '#fff',
+}));
 
-const MovieIcon = styled.div<ThemeProps>`
-  font-size: 40px;
-  margin-bottom: 1rem;
-`;
+const SeatButton = styled(Button)<{ isselected?: boolean }>(({ theme, isselected }) => ({
+  minWidth: '40px',
+  margin: '4px',
+  backgroundColor: isselected ? theme.palette.primary.main : theme.palette.background.paper,
+  color: isselected ? theme.palette.primary.contrastText : theme.palette.text.primary,
+  '&:hover': {
+    backgroundColor: isselected ? theme.palette.primary.dark : theme.palette.action.hover,
+  },
+  '&.Mui-disabled': {
+    backgroundColor: theme.palette.action.disabledBackground,
+    color: theme.palette.action.disabled,
+  },
+}));
 
-const SelectedBadge = styled.div`
-  background: rgba(75, 181, 67, 0.1);
-  color: #4BB543;
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 12px;
-  animation: fadeIn 0.2s ease;
+const RoomSelection: React.FC<RoomSelectionProps> = ({
+  mode,
+  selectedSeats,
+  onSeatsChange,
+  ticketPrice,
+  bcvRate,
+  bcvDate,
+}) => {
+  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const seatsPerRow = 12;
+  const occupiedSeats = ['A1', 'B4', 'C7', 'D2', 'E5', 'F8', 'G3', 'H6'];
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
+  const handleSeatClick = (seatId: string) => {
+    if (selectedSeats.includes(seatId)) {
+      onSeatsChange(selectedSeats.filter(id => id !== seatId));
+    } else {
+      onSeatsChange([...selectedSeats, seatId]);
     }
-    to {
-      opacity: 1;
-    }
-  }
-`;
+  };
 
-const RoomButton = styled.button<RoomCardProps>`
-  width: 100%;
-  padding: 20px;
-  margin: 10px 0;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  background: rgba(255, 253, 250, 0.9);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  ${({ isSelected }: RoomCardProps) =>
-    isSelected &&
-    `
-    border-color: #4BB543;
-    box-shadow: 0 4px 12px rgba(75, 181, 67, 0.15);
-    background: rgba(255, 255, 255, 0.95);
-  `}
-`;
-
-const RoomHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 1rem;
-`;
-
-const RoomName = styled.h3`
-  font-size: 1.5rem;
-  margin: 0 0 8px 0;
-  color: #1a1a1a;
-`;
-
-const RoomPrice = styled.span`
-  font-size: 1.2rem;
-  color: #1a1a1a;
-  font-weight: bold;
-  margin-left: 12px;
-`;
-
-const RoomType = styled.span`
-  font-size: 1rem;
-  color: #41E1E1;
-  font-weight: bold;
-  background: rgba(65, 225, 225, 0.1);
-  padding: 4px 12px;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 8px;
-`;
-
-const RoomDescription = styled.p`
-  font-size: 0.9rem;
-  color: #4a4a4a;
-  margin: 8px 0;
-  line-height: 1.4;
-`;
-
-const SeatsInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85rem;
-  color: #4a4a4a;
-  margin: 8px 0;
-  
-  span {
-    color: #41E1E1;
-    font-size: 1rem;
-  }
-`;
-
-const FeatureList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  padding-top: 12px;
-`;
-
-const FeatureItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: #4a4a4a;
-  
-  span.icon {
-    color: #41E1E1;
-    font-size: 0.9rem;
-    min-width: 16px;
-    text-align: center;
-  }
-`;
-
-const HeaderContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 2rem;
-`;
-
-const MainContent = styled.div`
-  min-height: 100vh;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0);
-`;
-
-const RoomSelection: React.FC<RoomSelectionProps> = ({ mode, onRoomSelected, selectedRoom, onBack }) => {
   return (
-    <MainContent>
-      <HeaderContainer>
-        <MovieIcon currentTheme={mode}>
-          🎬
-        </MovieIcon>
-        <Title currentTheme={mode}>Selecciona una Sala</Title>
-        <Subtitle currentTheme={mode}>Elige la sala que mejor se adapte a tu experiencia cinematográfica</Subtitle>
-      </HeaderContainer>
-
-      <Grid>
-        {Object.values(rooms).map((room) => (
-          <RoomButton
-            key={room.id}
-            isSelected={selectedRoom === room.id}
-            currentTheme={mode}
-            onClick={() => onRoomSelected(room.id)}
-          >
-            <RoomHeader>
-              <RoomName>{room.name}</RoomName>
-              <RoomPrice>{room.price}</RoomPrice>
-            </RoomHeader>
-            <RoomType>{room.type}</RoomType>
-            <RoomDescription>{room.description}</RoomDescription>
-            <SeatsInfo>
-              <span>🪑</span> {room.capacity} asientos
-            </SeatsInfo>
-            <FeatureList>
-              {room.features.map((feature, index) => (
-                <FeatureItem key={index}>
-                  <span className="icon">{feature.icon}</span>
-                  {feature.text}
-                </FeatureItem>
-              ))}
-            </FeatureList>
-            {selectedRoom === room.id && (
-              <SelectedBadge>
-                <span>✓</span> Sala seleccionada
-              </SelectedBadge>
+    <Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <StyledPaper>
+            <Typography variant="h6" gutterBottom align="center">
+              Selección de Asientos
+            </Typography>
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Precio Base: ${ticketPrice.basePrice.toFixed(2)} + Recargo: ${ticketPrice.surcharge.toFixed(2)} = ${ticketPrice.total.toFixed(2)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Bs. {ticketPrice.totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Tasa BCV: {bcvRate.toFixed(2)} - {bcvDate}
+              </Typography>
+            </Box>
+            <Box sx={{ mb: 4, textAlign: 'center' }}>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', mr: 3 }}>
+                <SeatButton size="small" disabled>
+                  <WeekendOutlined />
+                </SeatButton>
+                <Typography variant="caption" sx={{ ml: 1 }}>
+                  Ocupado
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', mr: 3 }}>
+                <SeatButton size="small">
+                  <WeekendOutlined />
+                </SeatButton>
+                <Typography variant="caption" sx={{ ml: 1 }}>
+                  Disponible
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                <SeatButton size="small" isselected>
+                  <WeekendOutlined />
+                </SeatButton>
+                <Typography variant="caption" sx={{ ml: 1 }}>
+                  Seleccionado
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ overflowX: 'auto' }}>
+              <Box sx={{ width: 'fit-content', margin: '0 auto' }}>
+                {rows.map((row) => (
+                  <Box key={row} sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                    <Typography sx={{ width: '30px', textAlign: 'right', mr: 1, mt: 1 }}>
+                      {row}
+                    </Typography>
+                    {Array.from({ length: seatsPerRow }, (_, i) => {
+                      const seatId = `${row}${i + 1}`;
+                      const isOccupied = occupiedSeats.includes(seatId);
+                      const isSelected = selectedSeats.includes(seatId);
+                      return (
+                        <SeatButton
+                          key={seatId}
+                          size="small"
+                          disabled={isOccupied}
+                          isselected={isSelected}
+                          onClick={() => handleSeatClick(seatId)}
+                        >
+                          <WeekendOutlined />
+                        </SeatButton>
+                      );
+                    })}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <Typography variant="body1">
+                Pantalla
+              </Typography>
+              <Box
+                sx={{
+                  height: '8px',
+                  backgroundColor: mode === 'dark' ? 'grey.800' : 'grey.300',
+                  borderRadius: '4px',
+                  width: '80%',
+                  margin: '8px auto',
+                }}
+              />
+            </Box>
+          </StyledPaper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <StyledPaper>
+            <Typography variant="h6" gutterBottom>
+              Asientos Seleccionados
+            </Typography>
+            {selectedSeats.length > 0 ? (
+              <>
+                <Box sx={{ mb: 2 }}>
+                  {selectedSeats.map((seatId) => (
+                    <Typography key={seatId} variant="body1">
+                      Asiento {seatId}
+                    </Typography>
+                  ))}
+                </Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Total por Asiento: ${ticketPrice.total.toFixed(2)}
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  Total: ${(ticketPrice.total * selectedSeats.length).toFixed(2)}
+                </Typography>
+                <Typography variant="subtitle1" color="success.main">
+                  Bs. {(ticketPrice.totalBs * selectedSeats.length).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body1" color="text.secondary">
+                No has seleccionado ningún asiento
+              </Typography>
             )}
-          </RoomButton>
-        ))}
+          </StyledPaper>
+        </Grid>
       </Grid>
-
-      {onBack && <BackButton currentTheme={mode} onClick={onBack}>← VOLVER A DETALLES</BackButton>}
-    </MainContent>
+    </Box>
   );
 };
 

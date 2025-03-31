@@ -17,7 +17,7 @@ export interface Product {
   image: string;
   category: 'combo' | 'popcorn' | 'drinks' | 'snacks';
   size?: 'S' | 'M' | 'L' | 'XL';
-  quantity?: number;
+  quantity: number;
 }
 
 export interface CartItem extends Product {
@@ -31,6 +31,7 @@ export interface Combo extends Product {
 interface SnackBarMenuProps {
   mode: 'dark' | 'light';
   onCombosSelected?: (combos: Combo[]) => void;
+  onProductsSelected?: (products: Product[]) => void;
   showOnlyInBooking?: boolean;
 }
 
@@ -341,7 +342,7 @@ const popcorn: Product[] = [
   }
 ];
 
-const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, showOnlyInBooking }) => {
+const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, onProductsSelected, showOnlyInBooking }) => {
   const [selectedCombos, setSelectedCombos] = useState<Combo[]>(combos.map(combo => ({ ...combo, quantity: 0 })));
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([
     ...drinks.map(drink => ({ ...drink, quantity: 0 })),
@@ -385,12 +386,13 @@ const SnackBarMenu: React.FC<SnackBarMenuProps> = ({ mode, onCombosSelected, sho
     } else {
       const updatedProducts = selectedProducts.map(product => {
         if (product.id === productId) {
-          const newQuantity = increment ? (product.quantity || 0) + 1 : Math.max(0, (product.quantity || 0) - 1);
+          const newQuantity = increment ? product.quantity + 1 : Math.max(0, product.quantity - 1);
           return { ...product, quantity: newQuantity };
         }
         return product;
       });
       setSelectedProducts(updatedProducts);
+      onProductsSelected?.(updatedProducts.filter(product => product.quantity > 0));
     }
   };
 
