@@ -10,8 +10,8 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 
 # Añadir el directorio raíz al path de Python
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 sys.path.insert(0, project_root)
 
 # Importaciones después de ajustar el path

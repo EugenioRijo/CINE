@@ -22,6 +22,7 @@ import {
   Payments,
   CurrencyBitcoin,
 } from '@mui/icons-material';
+import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Combo } from './SnackBar';
 
@@ -79,6 +80,56 @@ interface PaymentMethodData {
   title: string;
   description: string;
   icon: React.ReactNode;
+}
+interface PaymentMetadata {
+  mode: 'light' | 'dark';
+  onModeChange: string;
+  timestamp: string;
+}
+
+interface ClienteData {
+  id: number;
+  cedula: string;
+  nombre: string;
+  email: string;
+  membresia: string;
+}
+
+interface AsientoData {
+  id: string;
+  fila: string;
+  numero: number;
+  tipo: string[];
+}
+
+interface ProductoData {
+  nombre: string;
+  precio_unitario: number;
+  cantidad: number;
+  categoria?: string;
+}
+
+interface FinancieroData {
+  subtotal_entradas: number;
+  subtotal_snacks: number;
+  total: number;
+  totalBs: number;
+  tasa_bcv: number;
+  metodo_pago: string;
+}
+
+interface PaymentData {
+  metadata: PaymentMetadata;
+  cliente: ClienteData;
+  pelicula: {
+    titulo: string;
+    horario: string;
+    sala: string;
+    idioma: string;
+  };
+  asientos: AsientoData[];
+  productos: ProductoData[];
+  financiero: FinancieroData;
 }
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -189,6 +240,7 @@ const Payment: React.FC<PaymentProps> = ({
   bcvRate,
   bcvDate,
 }) => {
+  const { user, token } = useAuth(); // Acceder al contexto
   const navigate = useNavigate();
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
 
@@ -227,10 +279,88 @@ const Payment: React.FC<PaymentProps> = ({
     setSelectedPayment(selectedPayment === methodId ? null : methodId);
   };
 
-  const handleConfirmPayment = () => {
-    if (!selectedPayment) return;
-    alert('¡Pago procesado! Disfruta tu película.');
-    navigate('/');
+  const handleConfirmPayment = async () => {
+    if (!selectedPayment || !user) {
+      alert('Seleccione método de pago y asegúrese de estar autenticado');
+      return;
+    }
+  
+    const formatoMonetario = (valor: number): number => Math.round(valor * 100) / 100;
+  
+    // Asignación con tipo
+    const paymentData: PaymentData = {
+      metadata: {
+        mode,
+        onModeChange: onModeChange.toString(),
+        timestamp: new Date().toISOString()
+      },
+      cliente: {
+        id: user.id,
+        cedula: user.cedula,
+        nombre: user.nombre,
+        email: user.email,
+        membresia: user.es_miembro ? "Premium" : "Regular"
+      },
+      pelicula: {
+        titulo: movieTitle,
+        horario: selectedTime,
+        sala: selectedRoom,
+        idioma: selectedLanguage
+      },
+      asientos: selectedSeats.map(seat => ({
+        id: seat.id,
+        fila: seat.row,
+        numero: seat.number,
+        tipo: [
+          ...(seat.isHandicap ? ['Discapacidad'] : []),
+          ...(seat.isReclinable ? ['Reclinable'] : []),
+          ...(seat.isPreferential ? ['Preferencial'] : [])
+        ]
+      })),
+      productos: [
+        ...selectedProducts.filter(p => p.quantity > 0).map(p => ({
+          nombre: p.name,
+          precio_unitario: p.price,
+          cantidad: p.quantity,
+          categoria: p.category
+        })),
+        ...selectedCombos.filter(c => c.quantity > 0).map(c => ({
+          nombre: c.name,
+          precio_unitario: c.price,
+          cantidad: c.quantity,
+        }))
+      ],
+      financiero: {
+        subtotal_entradas: formatoMonetario(ticketPrice.total * selectedSeats.length),
+        subtotal_snacks: formatoMonetario(totalPrice.productsTotal),
+        total: formatoMonetario(totalPrice.total),
+        totalBs: formatoMonetario(totalPrice.totalBs),
+        tasa_bcv: formatoMonetario(bcvRate),
+        metodo_pago: selectedPayment
+      }
+    };
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/payments/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(paymentData),
+      });
+  
+      if (!response.ok) throw new Error('Error en el pago');
+      
+      const result = await response.json();
+      console.log('Respuesta del servidor:', result);
+      alert('¡Compra exitosa! Factura enviada por correo');
+      navigate('/');
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error instanceof Error ? error.message : 'Error desconocido');
+    }
   };
 
   const getRoomName = (roomId: string) => {
